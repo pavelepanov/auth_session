@@ -1,6 +1,7 @@
 from auth.domain.entities.session import Session, SessionId
 from auth.domain.entities.user import UserId
-from auth.domain.interfaces.str_session_id_generator import StrSessionIdGenerator
+from auth.domain.interfaces.str_session_id_generator import \
+    StrSessionIdGenerator
 
 
 class SessionService:
