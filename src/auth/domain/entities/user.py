@@ -11,4 +11,3 @@ class User:
     id: UserId
     password_hash: PasswordHash
     is_active: bool
-    
