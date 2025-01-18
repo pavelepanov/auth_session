@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from auth.domain.entities.user import UserId
 from typing import NewType
 
-SessionId = NewType("SessionId", bytes)
+SessionId = NewType("SessionId", str)
 
 @dataclass
 class Session:
