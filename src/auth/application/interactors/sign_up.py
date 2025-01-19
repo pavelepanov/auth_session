@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from uuid import UUID
-from auth.application.interfaces.identity_provider import IdentityProvider
-from auth.application.interfaces.user_data_gateway import UserDataGateway
-from auth.domain.services.user import UserService
-from auth.application.interfaces.transaction_manager import TransactionManager
-from auth.domain.entities.user import User, PasswordHash, UserName, Password
-from auth.application.interfaces.password_hasher import PasswordHasher
+
 from auth.application.errors import AuthenticationError
+from auth.application.interfaces.identity_provider import IdentityProvider
+from auth.application.interfaces.password_hasher import PasswordHasher
+from auth.application.interfaces.transaction_manager import TransactionManager
+from auth.application.interfaces.user_data_gateway import UserDataGateway
+from auth.domain.entities.user import Password, PasswordHash, User, UserName
+from auth.domain.services.user import UserService
 
 
 @dataclass
@@ -21,13 +22,14 @@ class SignUpResponse:
 
 
 class SignUpInteractor:
-    def __init__(self,
-                 identity_provider: IdentityProvider,
-                 user_data_gateway: UserDataGateway,
-                 user_service: UserService,
-                 transaction_manager: TransactionManager,
-                 password_hasher: PasswordHasher,
-                 ):
+    def __init__(
+        self,
+        identity_provider: IdentityProvider,
+        user_data_gateway: UserDataGateway,
+        user_service: UserService,
+        transaction_manager: TransactionManager,
+        password_hasher: PasswordHasher,
+    ):
         self._identity_provider = identity_provider
         self._user_data_gateway = user_data_gateway
         self._user_service = user_service
@@ -45,7 +47,9 @@ class SignUpInteractor:
         password: Password = Password(request_data.password)
         password_hash: PasswordHash = self._password_hasher.hash(password=password)
 
-        user: User = self._user_service.create_user(username=username, password_hash=password_hash)
+        user: User = self._user_service.create_user(
+            username=username, password_hash=password_hash
+        )
 
         await self._user_data_gateway.add(user)
 
