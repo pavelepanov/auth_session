@@ -4,7 +4,7 @@ from uuid import UUID
 
 UserId = NewType("UserId", UUID)
 UserName = NewType("Username", str)
-PasswordHash = NewType("PasswordHash", bytes)
+PasswordHash = NewType("PasswordHash", str)
 
 RawPassword = NewType("RawPassword", str)
 
