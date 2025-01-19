@@ -3,10 +3,10 @@ from uuid import UUID
 
 from auth.application.errors import AuthenticationError
 from auth.application.interfaces.identity_provider import IdentityProvider
-from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.domain.entities.user import PasswordHash, RawPassword, User, UserName
+from auth.domain.interfaces.password_hasher import PasswordHasher
 from auth.domain.services.user import UserService
 
 
