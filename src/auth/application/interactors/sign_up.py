@@ -6,14 +6,14 @@ from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
-from auth.domain.entities.user import Password, PasswordHash, User, UserName
+from auth.domain.entities.user import PasswordHash, RawPassword, User, UserName
 from auth.domain.services.user import UserService
 
 
 @dataclass
 class SignUpRequest:
     username: str
-    password: str
+    raw_password: str
 
 
 @dataclass
@@ -44,8 +44,10 @@ class SignUpInteractor:
             ...
 
         username: UserName = UserName(request_data.username)
-        password: Password = Password(request_data.password)
-        password_hash: PasswordHash = self._password_hasher.hash(password=password)
+        raw_password: RawPassword = RawPassword(request_data.raw_password)
+        password_hash: PasswordHash = self._password_hasher.hash(
+            raw_password=raw_password
+        )
 
         user: User = self._user_service.create_user(
             username=username, password_hash=password_hash
