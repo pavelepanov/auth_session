@@ -1,16 +1,15 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from auth.domain.entities.session import SessionId
-from auth.domain.entities.user import UserId
+from auth.domain.entities.session import Session, SessionId
 
 
 class SessionManager(Protocol):
     @abstractmethod
-    async def add(self, user_id: UserId) -> SessionId: ...
+    async def add(self, session: Session) -> None: ...
 
     @abstractmethod
     async def prolong_expiration(self, session_id: SessionId) -> None: ...
 
     @abstractmethod
-    async def check_existence(self, session_id: SessionId) -> bool: ...
+    async def is_exists(self, session_id: SessionId) -> bool: ...
