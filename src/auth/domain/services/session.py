@@ -7,7 +7,7 @@ class SessionService:
         self,
         id: SessionId,
         user_id: UserId,
-    ):
+    ) -> Session:
         return Session(
             id=id,
             user_id=user_id,
