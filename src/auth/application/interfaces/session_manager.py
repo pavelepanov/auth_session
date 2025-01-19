@@ -13,3 +13,9 @@ class SessionManager(Protocol):
 
     @abstractmethod
     async def is_exists(self, session_id: SessionId) -> bool: ...
+
+    @abstractmethod
+    async def get_current_session(self) -> Session | None: ...
+
+    @abstractmethod
+    async def delete_session(self) -> None: ...
