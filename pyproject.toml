@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Web_sessions_auth"
+version = "1.0.0"
+requires-python = ">=3.12"
+description = "Web sessions service"
+license = { file = "LICENSE" }
+dependencies = [
+    "alembic>=1.14.1",
+    "bcrypt>=4.2.1",
+    "fastapi[standard]>=0.115.7",
+    "gunicorn>=23.0.0",
+    "psycopg[async,binary]>=3.2.4",
+    "redis>=5.2.1",
+    "sqlalchemy[async]>=2.0.37",
+]
+
+[dependency-groups]
+dev = [
+    "isort>=5.13.2",
+    "python-dotenv>=1.0.1",
+    "ruff>=0.9.2",
+]
