@@ -1,0 +1,31 @@
+from sqlalchemy import select
+from sqlalchemy.sql.operators import eq
+from auth.application.interfaces.user_data_gateway import UserDataGateway
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from auth.domain.entities.user import User, UserId, UserName
+from auth.domain.entities.user import User
+
+
+class UserDataMapperSqla(UserDataGateway):
+    def __init__(self,
+                 session: AsyncSession,
+                 ):
+        self._session = session
+
+    async def add(self, user: User) -> None:
+        self._session.add(user)
+
+    async def read_by_id(self, user_id: UserId) -> User | None:
+        stmt = select(User).where(eq(User.id == user_id))
+
+        user: User | None = (await self._session.execute(stmt)).scalar_one_or_none()
+
+        return user
+
+    async def read_by_username(self, username: UserName) -> User | None:
+        stmt = select(User).where(eq(User.username, username))
+
+        user = (await self._session.execute(stmt)).scalar_one_or_none()
+
+        return user
