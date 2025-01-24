@@ -14,6 +14,9 @@ COMPOSE_FILE=docker-compose.yml
 help:
 	@echo "Используйте следующие команды:"
 	@echo "  make up-dev        - Запуск проекта в режиме разработки (использует $(ENV_DEV))"
+	@echo "  make down          - Остановление и удаление контейнера"
+	@echo "  make migrate       - Миграция на последнюю версию"
+	@echo "  make restart       - Остановление, запуск контейнера"
 
 # Запуск проекта в режиме разработки
 .PHONY: up-dev
