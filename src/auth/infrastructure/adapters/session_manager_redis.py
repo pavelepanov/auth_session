@@ -24,9 +24,9 @@ class SessionManagerRedis(SessionManager):
         return await self._client.exists(session_id)
 
     async def get_current_session(self) -> Session | None:
-        session_id: (
-            SessionId | None
-        ) = await self._request_manager.get_session_id_from_request()
+        session_id: SessionId | None = (
+            self._request_manager.get_session_id_from_request()
+        )
         if session_id is None:
             return None
 
