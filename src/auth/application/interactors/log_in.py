@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from auth.application.errors import AuthenticationError, DoesNotExists
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.request_manager import RequestManager
+from auth.application.interfaces.session_id_generator import SessionIdGenerator
 from auth.application.interfaces.session_manager import SessionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
-from auth.domain.entities.session import Session
+from auth.domain.entities.session import Session, SessionId
 from auth.domain.entities.user import RawPassword, User, UserName
 from auth.domain.services.session import SessionService
 from auth.domain.services.user import UserService
@@ -26,6 +27,7 @@ class LogInInteractor:
         session_service: SessionService,
         user_service: UserService,
         request_manager: RequestManager,
+        session_id_generator: SessionIdGenerator,
     ):
         self._identity_provider = identity_provider
         self._user_data_gateway = user_data_gateway
@@ -33,6 +35,7 @@ class LogInInteractor:
         self._session_service = session_service
         self._user_service = user_service
         self._request_manager = request_manager
+        self._session_id_generator = session_id_generator
 
     async def __call__(self, request_data: LogInRequest) -> None:
         try:
@@ -58,11 +61,15 @@ class LogInInteractor:
         if not user.is_active:
             raise AuthenticationError("Your account is not active.")
 
-        session: Session = self._session_service.create_session(user_id=user.id)
-
-        if self._session_manager.is_exists(session.id):
+        session: Session | None = await self._session_manager.get_current_session()
+        if session is not None:
             raise AuthenticationError("Already authenticated.")
+
+        session_id: SessionId = self._session_id_generator()
+        session: Session = self._session_service.create_session(
+            id=session_id, user_id=user.id
+        )
 
         await self._session_manager.add(session=session)
 
-        await self._request_manager.add_session_id_to_request(session_id=session.id)
+        self._request_manager.add_session_id_to_request(session_id=session.id)

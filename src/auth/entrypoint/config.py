@@ -21,7 +21,7 @@ class RedisConfig:
         return RedisConfig(
             host=host,
             port=port,
-            ttl=ttl,
+            ttl=int(ttl),
         )
 
 

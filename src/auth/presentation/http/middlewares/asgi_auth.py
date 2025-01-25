@@ -47,7 +47,7 @@ class ASGIAuthMiddleware:
         is_cookie_secure: bool = cookie_params.get("secure", False)
         cookie_samesite: Literal["strict"] | None = cookie_params.get("samesite", None)
 
-        cookie: SimpleCookie = SimpleCookie
+        cookie: SimpleCookie = SimpleCookie()
 
         cookie["id"] = new_session_id
         cookie["id"]["path"] = "/"
@@ -66,7 +66,7 @@ class ASGIAuthMiddleware:
         if not is_delete_id:
             return
 
-        cookie: SimpleCookie = SimpleCookie
+        cookie: SimpleCookie = SimpleCookie()
 
         cookie["id"] = ""
         cookie["id"]["path"] = "/"

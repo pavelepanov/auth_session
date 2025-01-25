@@ -15,13 +15,16 @@ class SessionManagerRedis(SessionManager):
         self._request_manager = request_manager
 
     async def add(self, session: Session) -> None:
-        await self._client.set(session.id, session.user_id, px=self._config.ttl)
+        self._client.set(session.id, str(session.user_id), px=self._config.ttl)
 
     async def prolong_expiration(self, session_id: SessionId) -> None:
         await self._client.expire(session_id, self._config.ttl)
 
     async def is_exists(self, session_id: SessionId) -> bool:
-        return await self._client.exists(session_id)
+        is_exists = await self._client.exists(session_id)
+        if is_exists == 1:
+            return True
+        return False
 
     async def get_current_session(self) -> Session | None:
         session_id: SessionId | None = (

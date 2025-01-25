@@ -12,6 +12,7 @@ services:
       - custom
     depends_on:
       - postgres
+      - redis
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
@@ -35,6 +36,22 @@ services:
     ports:
       - "2344:${POSTGRES_PORT}"
 
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:${REDIS_PORT}"
+    networks:
+      - custom
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+
+
+
 networks:
   custom:
     driver: bridge
+
+volumes:
+  redis_data:
