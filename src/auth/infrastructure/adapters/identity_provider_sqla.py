@@ -18,6 +18,6 @@ class IdentityProviderSession(IdentityProvider):
         if session is None:
             raise AuthenticationError("Not authenticated.")
 
-        await self._session_manager.prolong_expiration(session.id)
+        self._session_manager.prolong_expiration(session)
 
-        return session.user_id
+        return session

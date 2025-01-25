@@ -70,6 +70,6 @@ class LogInInteractor:
             id=session_id, user_id=user.id
         )
 
-        await self._session_manager.add(session=session)
+        self._session_manager.add(session=session)
 
         self._request_manager.add_session_id_to_request(session_id=session.id)

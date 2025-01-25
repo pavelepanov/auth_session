@@ -14,11 +14,11 @@ class SessionManagerRedis(SessionManager):
         self._config = config
         self._request_manager = request_manager
 
-    async def add(self, session: Session) -> None:
+    def add(self, session: Session) -> None:
         self._client.set(session.id, str(session.user_id), px=self._config.ttl)
 
-    async def prolong_expiration(self, session_id: SessionId) -> None:
-        await self._client.expire(session_id, self._config.ttl)
+    def prolong_expiration(self, session_id: SessionId) -> None:
+        self._client.expire(session_id, self._config.ttl)
 
     async def is_exists(self, session_id: SessionId) -> bool:
         is_exists = await self._client.exists(session_id)
@@ -30,6 +30,7 @@ class SessionManagerRedis(SessionManager):
         session_id: SessionId | None = (
             self._request_manager.get_session_id_from_request()
         )
+
         if session_id is None:
             return None
 
@@ -37,9 +38,9 @@ class SessionManagerRedis(SessionManager):
 
         return session
 
-    async def delete_session(self) -> None:
-        session_id: (
-            SessionId | None
-        ) = await self._request_manager.get_session_id_from_request()
+    def delete_session(self) -> None:
+        session_id: SessionId | None = (
+            self._request_manager.get_session_id_from_request()
+        )
 
-        await self._client.delete(session_id)
+        self._client.delete(session_id)
