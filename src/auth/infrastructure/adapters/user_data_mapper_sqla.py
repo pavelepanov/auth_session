@@ -1,16 +1,16 @@
 from sqlalchemy import select
-from sqlalchemy.sql.operators import eq
-from auth.application.interfaces.user_data_gateway import UserDataGateway
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.operators import eq
 
+from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.domain.entities.user import User, UserId, UserName
-from auth.domain.entities.user import User
 
 
 class UserDataMapperSqla(UserDataGateway):
-    def __init__(self,
-                 session: AsyncSession,
-                 ):
+    def __init__(
+        self,
+        session: AsyncSession,
+    ):
         self._session = session
 
     async def add(self, user: User) -> None:

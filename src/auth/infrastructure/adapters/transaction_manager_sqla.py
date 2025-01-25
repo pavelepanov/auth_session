@@ -1,7 +1,6 @@
-from auth.application.interfaces.transaction_manager import TransactionManager
-
-
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from auth.application.interfaces.transaction_manager import TransactionManager
 
 
 class TransactionManagerImpl(TransactionManager):
@@ -10,4 +9,3 @@ class TransactionManagerImpl(TransactionManager):
 
     async def commit(self) -> None:
         await self._session.commit()
-
