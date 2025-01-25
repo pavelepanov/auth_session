@@ -99,6 +99,15 @@ wheels = [
 ]
 
 [[package]]
+name = "dishka"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/a8/e78e0d08e9a2e7839d2742527600eb6f55313c6df07774a26848aa6a87b0/dishka-1.4.2.tar.gz", hash = "sha256:fe1e7b2d0df4306b39650cf4c05485aa79ce1fc31507d1f73300dec3c64b2397", size = 57511 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8b/30/403cbe18d8dda6ce1d95ecd1039e5b01fd39011dd6bf31647e9b61bd5758/dishka-1.4.2-py3-none-any.whl", hash = "sha256:5a59c6bf5ac9f34b3e698093207ddb871c13a0721eeb3948eb29011aee61f69c", size = 79798 },
+]
+
+[[package]]
 name = "dnspython"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -770,6 +779,7 @@ source = { editable = "." }
 dependencies = [
     { name = "alembic" },
     { name = "bcrypt" },
+    { name = "dishka" },
     { name = "fastapi", extra = ["standard"] },
     { name = "gunicorn" },
     { name = "psycopg", extra = ["binary"] },
@@ -788,6 +798,7 @@ dev = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.14.1" },
     { name = "bcrypt", specifier = ">=4.2.1" },
+    { name = "dishka", specifier = ">=1.4.2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.7" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "psycopg", extras = ["async", "binary"], specifier = ">=3.2.4" },
