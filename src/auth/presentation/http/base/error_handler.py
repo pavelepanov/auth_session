@@ -4,8 +4,9 @@ from typing import cast
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette import status as code
-from auth.domain.errors import Error
+
 from auth.application.errors import AuthenticationError
+from auth.domain.errors import Error
 
 
 class HTTPError(Error): ...
