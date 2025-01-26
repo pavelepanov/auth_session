@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from auth.application.errors import AuthenticationError
+from auth.application.errors import AlreadyExists, AuthenticationError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
@@ -52,6 +52,13 @@ class SignUpInteractor:
         password_hash: PasswordHash = self._password_hasher.hash(
             raw_password=raw_password
         )
+
+        user: User | None = await self._user_data_gateway.read_by_username(
+            username=username
+        )
+
+        if user is not None:
+            raise AlreadyExists("User with this username already exists.")
 
         user: User = self._user_service.create_user(
             id=user_id, username=username, password_hash=password_hash
