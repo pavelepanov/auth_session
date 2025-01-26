@@ -45,3 +45,9 @@ class SessionManagerRedis(SessionManager):
             return None
 
         return user_id
+
+    async def is_exists(self, session_id: SessionId) -> bool:
+        is_exists = await self._client.exists(session_id)
+        if is_exists == 1:
+            return True
+        return False

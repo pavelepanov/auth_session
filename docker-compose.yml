@@ -44,14 +44,9 @@ services:
     networks:
       - custom
     command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
-    volumes:
-      - redis_data:/data
 
 
 
 networks:
   custom:
     driver: bridge
-
-volumes:
-  redis_data:

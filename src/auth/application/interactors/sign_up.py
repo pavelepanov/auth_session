@@ -1,7 +1,13 @@
+import logging
 from dataclasses import dataclass
 from uuid import UUID
 
-from auth.application.errors import AlreadyExists, AuthenticationError, InvalidPassword
+from auth.application.errors import (
+    AlreadyAuthenticated,
+    AlreadyExists,
+    AuthenticationError,
+    InvalidPassword,
+)
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
@@ -10,6 +16,8 @@ from auth.application.validators.check_raw_password import check_valid_raw_passw
 from auth.domain.entities.user import PasswordHash, RawPassword, User, UserId, UserName
 from auth.domain.interfaces.password_hasher import PasswordHasher
 from auth.domain.services.user import UserService
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -42,8 +50,9 @@ class SignUpInteractor:
 
     async def __call__(self, request_data: SignUpRequest) -> SignUpResponse:
         try:
-            await self._identity_provider.get_current_user_id()
-            raise AuthenticationError("You are already authenticated.")
+            user_id: UserId = await self._identity_provider.get_current_user_id()
+            if user_id is not None:
+                raise AlreadyAuthenticated("You are already authenticated.")
         except AuthenticationError:
             ...
 

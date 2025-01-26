@@ -18,6 +18,12 @@ class IdentityProviderSession(IdentityProvider):
         if session_id is None:
             raise AuthenticationError("Not authenticated.")
 
+        is_exists_session: bool = await self._session_manager.is_exists(session_id)
+
+        if not is_exists_session:
+            await self._session_manager.delete_session()
+            raise AuthenticationError("Not authenticated.")
+
         await self._session_manager.prolong_expiration(session_id)
 
         user_id: UserId = await self._session_manager.get_user_id(session_id)

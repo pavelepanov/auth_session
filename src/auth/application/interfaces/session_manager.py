@@ -20,3 +20,6 @@ class SessionManager(Protocol):
 
     @abstractmethod
     async def delete_session(self) -> None: ...
+
+    @abstractmethod
+    async def is_exists(self, session_id: SessionId) -> bool: ...
