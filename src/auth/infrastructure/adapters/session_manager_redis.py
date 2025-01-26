@@ -19,7 +19,7 @@ class SessionManagerRedis(SessionManager):
         await self._client.set(session.id, str(session.user_id), px=self._config.ttl)
 
     async def prolong_expiration(self, session_id: SessionId) -> None:
-        await self._client.expire(session_id, self._config.ttl)
+        await self._client.expire(session_id, self._config.ttl // 1000)
 
     def get_current_session_id(self) -> SessionId | None:
         session_id: SessionId | None = (
