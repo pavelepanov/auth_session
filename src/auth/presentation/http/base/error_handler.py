@@ -5,7 +5,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette import status as code
 
-from auth.application.errors import AuthenticationError
+from auth.application.errors import (
+    AlreadyExists,
+    AuthenticationError,
+    DoesNotExists,
+    InvalidPassword,
+)
 from auth.domain.errors import Error
 
 
@@ -21,4 +26,16 @@ def init_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         AuthenticationError,
         partial(validate, status=code.HTTP_401_UNAUTHORIZED),
+    )
+    app.add_exception_handler(
+        InvalidPassword,
+        partial(validate, status=code.HTTP_400_BAD_REQUEST),
+    )
+    app.add_exception_handler(
+        AlreadyExists,
+        partial(validate, status=code.HTTP_409_CONFLICT),
+    )
+    app.add_exception_handler(
+        DoesNotExists,
+        partial(validate, status=code.HTTP_404_NOT_FOUND),
     )
