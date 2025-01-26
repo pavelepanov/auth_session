@@ -1,9 +1,11 @@
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, status
 
-from auth.application.interactors.sign_up import (SignUpInteractor,
-                                                  SignUpRequest,
-                                                  SignUpResponse)
+from auth.application.interactors.sign_up import (
+    SignUpInteractor,
+    SignUpRequest,
+    SignUpResponse,
+)
 
 sign_up_router = APIRouter()
 

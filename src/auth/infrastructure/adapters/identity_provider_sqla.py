@@ -1,7 +1,7 @@
 from auth.application.errors import AuthenticationError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.session_manager import SessionManager
-from auth.domain.entities.session import Session, SessionId
+from auth.domain.entities.session import SessionId
 from auth.domain.entities.user import UserId
 
 

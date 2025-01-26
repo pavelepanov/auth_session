@@ -2,8 +2,12 @@ from typing import AsyncIterable
 
 from dishka import Provider, Scope, from_context, provide
 from redis import Redis
-from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
-                                    async_sessionmaker, create_async_engine)
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from starlette.requests import Request
 
 from auth.application.interfaces.identity_provider import IdentityProvider
@@ -17,23 +21,17 @@ from auth.domain.interfaces.password_hasher import PasswordHasher
 from auth.domain.services.session import SessionService
 from auth.domain.services.user import UserService
 from auth.entrypoint.config import Config, RedisConfig
-from auth.infrastructure.adapters.identity_provider_sqla import \
-    IdentityProviderSession
-from auth.infrastructure.adapters.password_hasher_bcrypt import \
-    PasswordHasherBcrypt
-from auth.infrastructure.adapters.session_id_generator_str import \
-    SessionIdGeneratorImpl
-from auth.infrastructure.adapters.session_manager_redis import \
-    SessionManagerRedis
-from auth.infrastructure.adapters.transaction_manager_sqla import \
-    TransactionManagerImpl
-from auth.infrastructure.adapters.user_data_mapper_sqla import \
-    UserDataMapperSqla
-from auth.infrastructure.adapters.user_id_generator_uuid import \
-    UserIdGeneratorImpl
+from auth.infrastructure.adapters.identity_provider_sqla import IdentityProviderSession
+from auth.infrastructure.adapters.password_hasher_bcrypt import PasswordHasherBcrypt
+from auth.infrastructure.adapters.session_id_generator_str import SessionIdGeneratorImpl
+from auth.infrastructure.adapters.session_manager_redis import SessionManagerRedis
+from auth.infrastructure.adapters.transaction_manager_sqla import TransactionManagerImpl
+from auth.infrastructure.adapters.user_data_mapper_sqla import UserDataMapperSqla
+from auth.infrastructure.adapters.user_id_generator_uuid import UserIdGeneratorImpl
 from auth.presentation.http.base.cookie_params import CookieParams
-from auth.presentation.http.middlewares.request_manager_cookie import \
-    RequestManagerCookie
+from auth.presentation.http.middlewares.request_manager_cookie import (
+    RequestManagerCookie,
+)
 
 
 class SqlaProvider(Provider):
