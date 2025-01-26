@@ -3,6 +3,7 @@ from redis import Redis
 from auth.application.interfaces.request_manager import RequestManager
 from auth.application.interfaces.session_manager import SessionManager
 from auth.domain.entities.session import Session, SessionId
+from auth.domain.entities.user import UserId
 from auth.entrypoint.config import RedisConfig
 
 
@@ -20,13 +21,7 @@ class SessionManagerRedis(SessionManager):
     def prolong_expiration(self, session_id: SessionId) -> None:
         self._client.expire(session_id, self._config.ttl)
 
-    async def is_exists(self, session_id: SessionId) -> bool:
-        is_exists = await self._client.exists(session_id)
-        if is_exists == 1:
-            return True
-        return False
-
-    async def get_current_session(self) -> Session | None:
+    def get_current_session_id(self) -> SessionId | None:
         session_id: SessionId | None = (
             self._request_manager.get_session_id_from_request()
         )
@@ -34,9 +29,7 @@ class SessionManagerRedis(SessionManager):
         if session_id is None:
             return None
 
-        session: Session = self._client.get(session_id)
-
-        return session
+        return session_id
 
     def delete_session(self) -> None:
         session_id: SessionId | None = (
@@ -44,3 +37,11 @@ class SessionManagerRedis(SessionManager):
         )
 
         self._client.delete(session_id)
+
+    def get_user_id(self, session_id: SessionId) -> UserId | None:
+        user_id: UserId = self._client.get(session_id)
+
+        if user_id is None:
+            return None
+
+        return user_id

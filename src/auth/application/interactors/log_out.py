@@ -4,7 +4,7 @@ from auth.application.interfaces.request_manager import RequestManager
 from auth.application.interfaces.session_manager import SessionManager
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
-from auth.domain.entities.session import Session
+from auth.domain.entities.session import Session, SessionId
 from auth.domain.entities.user import UserId
 
 
@@ -29,10 +29,10 @@ class LogOutInteractor:
         if user_id is None:
             raise AuthenticationError("Not authenticated.")
 
-        current_session: (
-            Session | None
-        ) = await self._session_manager.get_current_session()
-        if current_session is None:
+        current_session_id: (
+            SessionId | None
+        ) = self._session_manager.get_current_session_id()
+        if current_session_id is None:
             raise AuthenticationError("Not authenticated.")
 
         self._request_manager.delete_session_from_request()

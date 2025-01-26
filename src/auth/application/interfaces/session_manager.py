@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Protocol
 
 from auth.domain.entities.session import Session, SessionId
+from auth.domain.entities.user import UserId
 
 
 class SessionManager(Protocol):
@@ -12,10 +13,10 @@ class SessionManager(Protocol):
     def prolong_expiration(self, session_id: SessionId) -> None: ...
 
     @abstractmethod
-    async def is_exists(self, session_id: SessionId) -> bool: ...
+    def get_user_id(self, session_id: SessionId) -> UserId | None: ...
 
     @abstractmethod
-    async def get_current_session(self) -> Session | None: ...
+    def get_current_session_id(self) -> SessionId | None: ...
 
     @abstractmethod
     def delete_session(self) -> None: ...

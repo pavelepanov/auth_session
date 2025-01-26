@@ -61,8 +61,8 @@ class LogInInteractor:
         if not user.is_active:
             raise AuthenticationError("Your account is not active.")
 
-        session: Session | None = await self._session_manager.get_current_session()
-        if session is not None:
+        session_id: SessionId | None = self._session_manager.get_current_session_id()
+        if session_id is not None:
             raise AuthenticationError("Already authenticated.")
 
         session_id: SessionId = self._session_id_generator()
