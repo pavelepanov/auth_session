@@ -1,7 +1,7 @@
 from typing import AsyncIterable
 
 from dishka import Provider, Scope, from_context, provide
-from redis import Redis
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,

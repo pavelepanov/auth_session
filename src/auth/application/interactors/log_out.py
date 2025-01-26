@@ -37,4 +37,4 @@ class LogOutInteractor:
 
         self._request_manager.delete_session_from_request()
 
-        self._session_manager.delete_session()
+        await self._session_manager.delete_session()

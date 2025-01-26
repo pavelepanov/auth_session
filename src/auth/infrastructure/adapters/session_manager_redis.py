@@ -1,4 +1,4 @@
-from redis import Redis
+from redis.asyncio import Redis
 
 from auth.application.interfaces.request_manager import RequestManager
 from auth.application.interfaces.session_manager import SessionManager
@@ -15,11 +15,11 @@ class SessionManagerRedis(SessionManager):
         self._config = config
         self._request_manager = request_manager
 
-    def add(self, session: Session) -> None:
-        self._client.set(session.id, str(session.user_id), px=self._config.ttl)
+    async def add(self, session: Session) -> None:
+        await self._client.set(session.id, str(session.user_id), px=self._config.ttl)
 
-    def prolong_expiration(self, session_id: SessionId) -> None:
-        self._client.expire(session_id, self._config.ttl)
+    async def prolong_expiration(self, session_id: SessionId) -> None:
+        await self._client.expire(session_id, self._config.ttl)
 
     def get_current_session_id(self) -> SessionId | None:
         session_id: SessionId | None = (
@@ -31,15 +31,15 @@ class SessionManagerRedis(SessionManager):
 
         return session_id
 
-    def delete_session(self) -> None:
+    async def delete_session(self) -> None:
         session_id: SessionId | None = (
             self._request_manager.get_session_id_from_request()
         )
 
-        self._client.delete(session_id)
+        await self._client.delete(session_id)
 
-    def get_user_id(self, session_id: SessionId) -> UserId | None:
-        user_id: UserId = self._client.get(session_id)
+    async def get_user_id(self, session_id: SessionId) -> UserId | None:
+        user_id: UserId = await self._client.get(session_id)
 
         if user_id is None:
             return None
