@@ -26,7 +26,7 @@ class ASGIAuthMiddleware:
             headers: MutableHeaders = MutableHeaders(scope=message)
 
             self._set_id_cookie(request, headers)
-            self._delete_id_coolie(request, headers)
+            self._delete_id_cookie(request, headers)
 
             await send(message)
 
@@ -61,7 +61,7 @@ class ASGIAuthMiddleware:
 
         headers.append("Set-Cookie", cookie.output(header="").strip())
 
-    def _delete_id_coolie(self, request: Request, headers: MutableHeaders) -> None:
+    def _delete_id_cookie(self, request: Request, headers: MutableHeaders) -> None:
         is_delete_id: bool = getattr(request.state, "delete_session_id", False)
         if not is_delete_id:
             return

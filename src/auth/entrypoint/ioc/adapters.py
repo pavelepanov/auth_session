@@ -28,10 +28,8 @@ from auth.infrastructure.adapters.session_manager_redis import SessionManagerRed
 from auth.infrastructure.adapters.transaction_manager_sqla import TransactionManagerImpl
 from auth.infrastructure.adapters.user_data_mapper_sqla import UserDataMapperSqla
 from auth.infrastructure.adapters.user_id_generator_uuid import UserIdGeneratorImpl
+from auth.presentation.http.adapters.request_manager_cookie import RequestManagerCookie
 from auth.presentation.http.base.cookie_params import CookieParams
-from auth.presentation.http.middlewares.request_manager_cookie import (
-    RequestManagerCookie,
-)
 
 
 class SqlaProvider(Provider):
