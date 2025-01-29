@@ -6,11 +6,12 @@ from fastapi.responses import JSONResponse
 from starlette import status as code
 
 from auth.application.errors import (
-    AlreadyAuthenticated,
     AlreadyExists,
     AuthenticationError,
     DoesNotExists,
     InvalidPassword,
+    LogInError,
+    SignUpError,
 )
 from auth.domain.errors import Error
 
@@ -41,5 +42,8 @@ def init_error_handlers(app: FastAPI) -> None:
         partial(validate, status=code.HTTP_404_NOT_FOUND),
     )
     app.add_exception_handler(
-        AlreadyAuthenticated, partial(validate, status=code.HTTP_409_CONFLICT)
+        SignUpError, partial(validate, status=code.HTTP_409_CONFLICT)
+    )
+    app.add_exception_handler(
+        LogInError, partial(validate, status=code.HTTP_409_CONFLICT)
     )

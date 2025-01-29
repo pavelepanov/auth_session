@@ -19,7 +19,9 @@ from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
 from auth.entrypoint.config import Config, RedisConfig
-from auth.infrastructure.adapters.identity_provider_sqla import IdentityProviderSession
+from auth.infrastructure.adapters.identity_provider_session import (
+    IdentityProviderSession,
+)
 from auth.infrastructure.adapters.password_hasher_bcrypt import PasswordHasherBcrypt
 from auth.infrastructure.adapters.session_id_generator_str import SessionIdGeneratorImpl
 from auth.infrastructure.adapters.session_manager_redis import SessionManagerRedis

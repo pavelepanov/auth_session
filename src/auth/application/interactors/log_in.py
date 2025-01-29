@@ -1,10 +1,6 @@
 from dataclasses import dataclass
 
-from auth.application.errors import (
-    AlreadyAuthenticated,
-    AuthenticationError,
-    DoesNotExists,
-)
+from auth.application.errors import AuthenticationError, DoesNotExists, LogInError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.request_manager import RequestManager
@@ -12,7 +8,7 @@ from auth.application.interfaces.session_id_generator import SessionIdGenerator
 from auth.application.interfaces.session_manager import SessionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.domain.entities.session import Session, SessionId, create_session
-from auth.domain.entities.user import RawPassword, User, UserId, UserName
+from auth.domain.entities.user import RawPassword, User, UserName
 
 
 @dataclass
@@ -39,12 +35,9 @@ class LogInInteractor:
         self._password_hasher = password_hasher
 
     async def __call__(self, request_data: LogInRequest) -> None:
-        try:
-            user_id: UserId = await self._identity_provider.get_current_user_id()
-            if user_id is not None:
-                raise AlreadyAuthenticated("You are already authenticated.")
-        except AuthenticationError:
-            ...
+        is_authenticated: bool = await self._identity_provider.is_authenticated()
+        if is_authenticated:
+            raise LogInError("You are already authenticated.")
 
         username: UserName = UserName(request_data.username)
         raw_password: RawPassword = RawPassword(request_data.raw_password)

@@ -1,12 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from auth.application.errors import (
-    AlreadyAuthenticated,
-    AlreadyExists,
-    AuthenticationError,
-    InvalidPassword,
-)
+from auth.application.errors import AlreadyExists, InvalidPassword, SignUpError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.transaction_manager import TransactionManager
@@ -50,12 +45,9 @@ class SignUpInteractor:
         self._user_id_generator = user_id_generator
 
     async def __call__(self, request_data: SignUpRequest) -> SignUpResponse:
-        try:
-            user_id: UserId = await self._identity_provider.get_current_user_id()
-            if user_id is not None:
-                raise AlreadyAuthenticated("You are already authenticated.")
-        except AuthenticationError:
-            ...
+        is_authenticated: bool = await self._identity_provider.is_authenticated()
+        if is_authenticated:
+            raise SignUpError("You are already authenticated.")
 
         user_id: UserId = self._user_id_generator()
         username: UserName = UserName(request_data.username)

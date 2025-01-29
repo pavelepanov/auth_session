@@ -33,3 +33,20 @@ class IdentityProviderSession(IdentityProvider):
         user_id: UserId = await self._session_manager.get_user_id(session_id)
 
         return user_id
+
+    async def is_authenticated(self) -> bool:
+        session_id: SessionId = self._session_manager.get_current_session_id()
+
+        if session_id is None:
+            return False
+
+        is_exists_session: bool = await self._session_manager.is_exists(session_id)
+
+        if not is_exists_session:
+            await self._session_manager.delete_session()
+            self._request_manager.delete_session_from_request()
+            return False
+
+        await self._session_manager.prolong_expiration(session_id)
+
+        return True
