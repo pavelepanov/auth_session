@@ -18,8 +18,6 @@ from auth.application.interfaces.session_manager import SessionManager
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
-from auth.domain.services.session import SessionService
-from auth.domain.services.user import UserService
 from auth.entrypoint.config import Config, RedisConfig
 from auth.infrastructure.adapters.identity_provider_sqla import IdentityProviderSession
 from auth.infrastructure.adapters.password_hasher_bcrypt import PasswordHasherBcrypt
@@ -109,11 +107,6 @@ class AuthProvider(Provider):
     password_hasher = provide(
         PasswordHasherBcrypt, scope=Scope.REQUEST, provides=PasswordHasher
     )
-
-
-class ServicesProvider(Provider):
-    session_service = provide(SessionService, scope=Scope.REQUEST)
-    user_service = provide(UserService, scope=Scope.REQUEST)
 
 
 class ConfigProvider(Provider):

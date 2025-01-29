@@ -10,3 +10,13 @@ SessionId = NewType("SessionId", str)
 class Session:
     id: SessionId
     user_id: UserId
+
+
+def create_session(
+    id: SessionId,
+    user_id: UserId,
+) -> Session:
+    return Session(
+        id=id,
+        user_id=user_id,
+    )

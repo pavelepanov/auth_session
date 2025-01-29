@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -14,10 +13,14 @@ from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
 from auth.application.validators.check_raw_password import check_valid_raw_password
-from auth.domain.entities.user import PasswordHash, RawPassword, User, UserId, UserName
-from auth.domain.services.user import UserService
-
-logger = logging.getLogger(__name__)
+from auth.domain.entities.user import (
+    PasswordHash,
+    RawPassword,
+    User,
+    UserId,
+    UserName,
+    create_user,
+)
 
 
 @dataclass
@@ -36,14 +39,12 @@ class SignUpInteractor:
         self,
         identity_provider: IdentityProvider,
         user_data_gateway: UserDataGateway,
-        user_service: UserService,
         transaction_manager: TransactionManager,
         password_hasher: PasswordHasher,
         user_id_generator: UserIdGenerator,
     ):
         self._identity_provider = identity_provider
         self._user_data_gateway = user_data_gateway
-        self._user_service = user_service
         self._transaction_manager = transaction_manager
         self._password_hasher = password_hasher
         self._user_id_generator = user_id_generator
@@ -78,7 +79,7 @@ class SignUpInteractor:
                 "one letter in uppercase, consists of at least 8 symbols"
             )
 
-        user: User = self._user_service.create_user(
+        user: User = create_user(
             id=user_id, username=username, password_hash=password_hash
         )
 
