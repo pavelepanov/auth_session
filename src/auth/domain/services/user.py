@@ -1,5 +1,5 @@
+from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.domain.entities.user import PasswordHash, RawPassword, User, UserId, UserName
-from auth.domain.interfaces.password_hasher import PasswordHasher
 
 
 class UserService:

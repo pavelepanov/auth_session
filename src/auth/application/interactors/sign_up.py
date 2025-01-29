@@ -9,12 +9,12 @@ from auth.application.errors import (
     InvalidPassword,
 )
 from auth.application.interfaces.identity_provider import IdentityProvider
+from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
 from auth.application.validators.check_raw_password import check_valid_raw_password
 from auth.domain.entities.user import PasswordHash, RawPassword, User, UserId, UserName
-from auth.domain.interfaces.password_hasher import PasswordHasher
 from auth.domain.services.user import UserService
 
 logger = logging.getLogger(__name__)

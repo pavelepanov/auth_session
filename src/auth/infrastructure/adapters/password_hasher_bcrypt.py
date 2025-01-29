@@ -1,7 +1,7 @@
 from bcrypt import checkpw, gensalt, hashpw
 
+from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.domain.entities.user import PasswordHash, RawPassword
-from auth.domain.interfaces.password_hasher import PasswordHasher
 
 
 class PasswordHasherBcrypt(PasswordHasher):
