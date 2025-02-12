@@ -11,6 +11,9 @@ class SessionDataGateway(Protocol):
     async def add(self, session: Session) -> None: ...
 
     @abstractmethod
+    async def read_by_id(self, session_id: SessionId) -> Session | None: ...
+
+    @abstractmethod
     async def get_user_id(self, session_id: SessionId) -> UserId | None: ...
 
     @abstractmethod

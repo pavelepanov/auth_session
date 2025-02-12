@@ -14,7 +14,7 @@ class SessionConfig:
     def from_env() -> "SessionConfig":
         expiration_minutes = getenv("SESSION_EXPIRATION_MINUTES")
 
-        return SessionConfig(expiration_minutes=expiration_minutes)
+        return SessionConfig(expiration_minutes=int(expiration_minutes))
 
 
 @dataclass

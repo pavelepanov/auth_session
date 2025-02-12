@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, UUID, Column, ForeignKey, String, Table
+from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, Table
 
 from auth.domain.entities.session import Session
 from auth.infrastructure.persistence_sqla.orm_registry import mapping_registry
@@ -7,7 +7,7 @@ sessions_table = Table(
     "sessions",
     mapping_registry.metadata,
     Column("id", String, primary_key=True),
-    Column("expiration", TIMESTAMP, nullable=False),
+    Column("expiration", DateTime(timezone=True), nullable=False),
     Column("user_id", UUID, ForeignKey("users.id"), unique=True),
 )
 
