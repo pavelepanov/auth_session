@@ -81,6 +81,12 @@ BACKEND_PORT=
 SESSION_EXPIRATION_MINUTES=
 ```
 
+## Как запустить
+1. Склонируй проект
+2. Заполни переменные окружения
+3. Подними проект ``docker compose up --build``
+4. Проведи миграции. Либо напрямую в контейнере, либо ``make migrate`` в терминале
+
 ## Полезные материалы
 1. Web sessions - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
 2. OAuth2 - https://auth0.com/docs и https://oauth.net/
