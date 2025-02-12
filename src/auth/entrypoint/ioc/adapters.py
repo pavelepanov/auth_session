@@ -13,18 +13,18 @@ from starlette.requests import Request
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.request_manager import RequestManager
+from auth.application.interfaces.session_data_gateway import SessionDataGateway
 from auth.application.interfaces.session_id_generator import SessionIdGenerator
-from auth.application.interfaces.session_manager import SessionManager
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
-from auth.entrypoint.config import Config, RedisConfig
+from auth.entrypoint.config import Config, RedisConfig, SessionConfig
 from auth.infrastructure.adapters.identity_provider_session import (
     IdentityProviderSession,
 )
 from auth.infrastructure.adapters.password_hasher_bcrypt import PasswordHasherBcrypt
+from auth.infrastructure.adapters.session_data_mapper_sqla import SessionDataMapperSqla
 from auth.infrastructure.adapters.session_id_generator_str import SessionIdGeneratorImpl
-from auth.infrastructure.adapters.session_manager_redis import SessionManagerRedis
 from auth.infrastructure.adapters.transaction_manager_sqla import TransactionManagerImpl
 from auth.infrastructure.adapters.user_data_mapper_sqla import UserDataMapperSqla
 from auth.infrastructure.adapters.user_id_generator_uuid import UserIdGeneratorImpl
@@ -60,6 +60,12 @@ class SqlaProvider(Provider):
         IdentityProviderSession, scope=Scope.REQUEST, provides=IdentityProvider
     )
 
+    session_data_mapper = provide(
+        SessionDataMapperSqla,
+        scope=Scope.REQUEST,
+        provides=SessionDataGateway,
+    )
+
 
 class IdGeneratorsProvider(Provider):
     session_id_generator = provide(
@@ -87,9 +93,9 @@ class RedisProvider(Provider):
             ttl=config.redis_config.ttl,
         )
 
-    session_manager = provide(
-        SessionManagerRedis, scope=Scope.REQUEST, provides=SessionManager
-    )
+    # session_manager = provide(
+    #    SessionManagerRedis, scope=Scope.REQUEST, provides=SessionManager
+    # )
 
 
 class AuthProvider(Provider):
@@ -99,6 +105,12 @@ class AuthProvider(Provider):
         if is_cookie_secure:
             return CookieParams(secure=True, samesite="strict")
         return CookieParams(secure=False)
+
+    @provide(scope=Scope.APP)
+    def provide_session_config(self, config: Config) -> SessionConfig:
+        return SessionConfig(
+            expiration_minutes=config.session_config.expiration_minutes,
+        )
 
     request = from_context(provides=Request, scope=Scope.REQUEST)
 

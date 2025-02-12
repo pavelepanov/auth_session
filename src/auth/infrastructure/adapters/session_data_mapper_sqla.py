@@ -1,0 +1,13 @@
+from auth.application.interfaces.session_data_gateway import SessionDataGateway
+from auth.domain.entities.session import Session, SessionId
+from auth.domain.entities.user import UserId
+
+
+class SessionDataMapperSqla(SessionDataGateway):
+    async def add(self, session: Session) -> None: ...
+
+    async def get_user_id(self, session_id: SessionId) -> UserId | None: ...
+
+    async def delete_session(self) -> None: ...
+
+    async def prolong_expiration(self, session_id: SessionId) -> None: ...
