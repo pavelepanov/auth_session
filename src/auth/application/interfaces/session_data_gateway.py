@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from datetime import datetime
 from typing import Protocol
 
 from auth.domain.entities.session import Session, SessionId
@@ -13,7 +14,9 @@ class SessionDataGateway(Protocol):
     async def get_user_id(self, session_id: SessionId) -> UserId | None: ...
 
     @abstractmethod
-    async def delete_session(self) -> None: ...
+    async def delete_session(self, session_id: SessionId) -> None: ...
 
     @abstractmethod
-    async def prolong_expiration(self, session_id: SessionId) -> None: ...
+    async def prolong_expiration(
+        self, session_id: SessionId, expiration: datetime
+    ) -> None: ...
