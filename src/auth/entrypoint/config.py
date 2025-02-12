@@ -7,6 +7,17 @@ load_dotenv()
 
 
 @dataclass
+class SessionConfig:
+    expiration_minutes: int
+
+    @staticmethod
+    def from_env() -> "SessionConfig":
+        expiration_minutes = getenv("SESSION_EXPIRATION_MINUTES")
+
+        return SessionConfig(expiration_minutes=int(expiration_minutes))
+
+
+@dataclass
 class RedisConfig:
     host: str
     port: int
@@ -54,10 +65,12 @@ class PostgresConfig:
 class Config:
     redis_config: RedisConfig
     postgres_config: PostgresConfig
+    session_config: SessionConfig
 
 
 def create_config() -> Config:
     return Config(
         redis_config=RedisConfig.from_env(),
         postgres_config=PostgresConfig.from_env(),
+        session_config=SessionConfig.from_env(),
     )

@@ -17,7 +17,7 @@ class UserDataMapperSqla(UserDataGateway):
         self._session.add(user)
 
     async def read_by_id(self, user_id: UserId) -> User | None:
-        stmt = select(User).where(eq(User.id == user_id))
+        stmt = select(User).where(eq(User.id, user_id))
 
         user: User | None = (await self._session.execute(stmt)).scalar_one_or_none()
 
