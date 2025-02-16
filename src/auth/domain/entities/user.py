@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import NewType
 from uuid import UUID
 
-from auth.domain.enums import UserRoleEnum
+from auth.domain.user_role import UserRoleEnum
 
 UserId = NewType("UserId", UUID)
 UserName = NewType("Username", str)

@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from os import getenv
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @dataclass
 class SessionConfig:

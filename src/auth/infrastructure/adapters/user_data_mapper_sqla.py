@@ -4,6 +4,7 @@ from sqlalchemy.sql.operators import eq
 
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.domain.entities.user import User, UserId, UserName
+from auth.domain.user_role import UserRoleEnum
 
 
 class UserDataMapperSqla(UserDataGateway):
@@ -29,3 +30,8 @@ class UserDataMapperSqla(UserDataGateway):
         user = (await self._session.execute(stmt)).scalar_one_or_none()
 
         return user
+
+    async def get_role(self, user_id: UserId) -> UserRoleEnum | None:
+        user: User | None = await self._session.get(User, user_id)
+
+        return user.role

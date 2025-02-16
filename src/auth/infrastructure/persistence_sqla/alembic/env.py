@@ -6,6 +6,9 @@ from sqlalchemy import engine_from_config, pool
 from auth.entrypoint.config import PostgresConfig
 from auth.infrastructure.persistence_sqla.orm_registry import mapping_registry
 
+from auth.infrastructure.persistence_sqla.mappings.user import User
+from auth.infrastructure.persistence_sqla.mappings.session import Session
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
