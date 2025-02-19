@@ -14,7 +14,7 @@ from auth.application.errors import (
     LogOutError,
     SignUpError,
 )
-from auth.domain.errors import Error
+from auth.domain.errors import AccessControlError, Error
 
 
 class HTTPError(Error): ...
@@ -50,4 +50,7 @@ def init_error_handlers(app: FastAPI) -> None:
     )
     app.add_exception_handler(
         LogOutError, partial(validate, status=code.HTTP_409_CONFLICT)
+    )
+    app.add_exception_handler(
+        AccessControlError, partial(validate, status=code.HTTP_403_FORBIDDEN)
     )

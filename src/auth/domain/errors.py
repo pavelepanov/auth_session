@@ -17,3 +17,6 @@ class Error(Exception):
 
 
 class DomainError(Error): ...
+
+
+class AccessControlError(DomainError): ...

@@ -1,6 +1,7 @@
-from sqlalchemy import UUID, Boolean, Column, String, Table
+from sqlalchemy import UUID, Boolean, Column, Enum, String, Table
 
 from auth.domain.entities.user import User
+from auth.domain.user_role import UserRoleEnum
 from auth.infrastructure.persistence_sqla.orm_registry import mapping_registry
 
 users_table = Table(
@@ -10,6 +11,7 @@ users_table = Table(
     Column("username", String, nullable=False),
     Column("password_hash", String, nullable=False),
     Column("is_active", Boolean, nullable=False),
+    Column("role", Enum(UserRoleEnum), nullable=False),
 )
 
 

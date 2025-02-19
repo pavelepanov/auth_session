@@ -1,12 +1,12 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from auth.domain.entities.user import UserId
+from auth.domain.user_role import UserRoleEnum
 
 
 class IdentityProvider(Protocol):
     @abstractmethod
-    async def get_current_user_id(self) -> UserId: ...
+    async def is_authenticated(self) -> bool: ...
 
     @abstractmethod
-    async def is_authenticated(self) -> bool: ...
+    async def get_role(self) -> UserRoleEnum: ...

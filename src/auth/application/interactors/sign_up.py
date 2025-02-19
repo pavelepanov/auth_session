@@ -16,6 +16,7 @@ from auth.domain.entities.user import (
     UserName,
     create_user,
 )
+from auth.domain.user_role import UserRoleEnum
 
 
 @dataclass
@@ -55,6 +56,7 @@ class SignUpInteractor:
         password_hash: PasswordHash = self._password_hasher.hash(
             raw_password=raw_password
         )
+        role: UserRoleEnum = UserRoleEnum.USER
 
         user: User | None = await self._user_data_gateway.read_by_username(
             username=username
@@ -72,7 +74,7 @@ class SignUpInteractor:
             )
 
         user: User = create_user(
-            id=user_id, username=username, password_hash=password_hash
+            id=user_id, username=username, password_hash=password_hash, role=role
         )
 
         await self._user_data_gateway.add(user)
