@@ -12,6 +12,7 @@ users_table = Table(
     Column("password_hash", String, nullable=False),
     Column("is_active", Boolean, nullable=False),
     Column("role", Enum(UserRoleEnum), nullable=False),
+    Column("is_verified", Boolean, nullable=False),
 )
 
 

@@ -1,7 +1,6 @@
 from typing import AsyncIterable
 
 from dishka import Provider, Scope, from_context, provide
-from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -13,12 +12,14 @@ from starlette.requests import Request
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.request_manager import RequestManager
+from auth.application.interfaces.sender_letter import SenderLetter
 from auth.application.interfaces.session_data_gateway import SessionDataGateway
 from auth.application.interfaces.session_id_generator import SessionIdGenerator
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
-from auth.entrypoint.config import Config, RedisConfig, SessionConfig
+from auth.entrypoint.config import Config, SessionConfig
+from auth.infrastructure.adapters.email_sender_letter import EmailSenderLetter
 from auth.infrastructure.adapters.identity_provider_session import (
     IdentityProviderSession,
 )
@@ -76,28 +77,6 @@ class IdGeneratorsProvider(Provider):
     )
 
 
-class RedisProvider(Provider):
-    @provide(scope=Scope.APP)
-    def provide_redis_client(self, config: Config) -> Redis:
-        return Redis(
-            host=config.redis_config.host,
-            port=config.redis_config.port,
-            decode_responses=True,
-        )
-
-    @provide(scope=Scope.APP)
-    def provide_redis_config(self, config: Config) -> RedisConfig:
-        return RedisConfig(
-            host=config.redis_config.host,
-            port=config.redis_config.port,
-            ttl=config.redis_config.ttl,
-        )
-
-    # session_manager = provide(
-    #    SessionManagerRedis, scope=Scope.REQUEST, provides=SessionManager
-    # )
-
-
 class AuthProvider(Provider):
     @provide(scope=Scope.APP)
     def provide_cookie_params(self) -> CookieParams:
@@ -120,6 +99,12 @@ class AuthProvider(Provider):
 
     password_hasher = provide(
         PasswordHasherBcrypt, scope=Scope.REQUEST, provides=PasswordHasher
+    )
+
+    email_sender_letter = provide(
+        EmailSenderLetter,
+        scope=Scope.REQUEST,
+        provides=SenderLetter,
     )
 
 
