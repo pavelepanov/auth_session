@@ -10,7 +10,7 @@
 # Проект
 ## Технологический стек
 - **Python**: `3.12`
-- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`
+- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`, `faststream[rabbit]`
 - **Development**: `isort`, `ruff`, `pre-commit`
 
 
@@ -32,6 +32,8 @@
   - Вход в аккаунт
 - 'logout' (DELETE): Открыт для **всех**
   - Выход с аккаунта
+- 'verification/{user_id}': Открыт для **всех**
+  - Верификация аккаунта, проходя по ссылке из письма на почте
 
 ### Hello world (`/hello_world`)
 - 'user' (GET): Открыт для **user**
