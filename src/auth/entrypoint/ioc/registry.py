@@ -6,6 +6,7 @@ from auth.entrypoint.ioc.adapters import (
     AuthProvider,
     ConfigProvider,
     IdGeneratorsProvider,
+    RabbitMQProvider,
     SqlaProvider,
 )
 from auth.entrypoint.ioc.interactors import InteractorProvider
@@ -18,4 +19,5 @@ def get_providers() -> Iterable[Provider]:
         IdGeneratorsProvider(),
         AuthProvider(),
         ConfigProvider(),
+        RabbitMQProvider(),
     )

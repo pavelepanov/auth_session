@@ -1,6 +1,7 @@
 from typing import AsyncIterable
 
 from dishka import Provider, Scope, from_context, provide
+from faststream.rabbit import RabbitBroker
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -18,7 +19,7 @@ from auth.application.interfaces.session_id_generator import SessionIdGenerator
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
-from auth.entrypoint.config import Config, SessionConfig
+from auth.entrypoint.config import Config, RabbitMQConfig, SessionConfig
 from auth.infrastructure.adapters.email_sender_letter import EmailSenderLetter
 from auth.infrastructure.adapters.identity_provider_session import (
     IdentityProviderSession,
@@ -106,6 +107,14 @@ class AuthProvider(Provider):
         scope=Scope.REQUEST,
         provides=SenderLetter,
     )
+
+
+class RabbitMQProvider(Provider):
+    broker = from_context(provides=RabbitBroker, scope=Scope.APP)
+
+    @provide(scope=Scope.APP)
+    def provide_rabbitmq_config(self, config: Config) -> RabbitMQConfig:
+        return config.rabbitmq_config
 
 
 class ConfigProvider(Provider):

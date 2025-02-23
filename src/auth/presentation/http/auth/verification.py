@@ -10,7 +10,7 @@ verification_router = APIRouter()
 
 
 @verification_router.post(
-    "verification/{user_id}",
+    "/verification/{user_id}",
     status_code=status.HTTP_200_OK,
 )
 @inject
