@@ -77,27 +77,23 @@
 
 ## Проект использует переменные окружения, их нужно установить:
 ```
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-POSTGRES_DB=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASS=123
+POSTGRES_HOST=
+POSTGRES_PORT=
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASS=
 
-BACKEND_PORT=8000
+BACKEND_PORT=
 
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_TTL=30000
+SESSION_EXPIRATION_MINUTES=
 
-SESSION_EXPIRATION_MINUTES=1
+RABBITMQ_HOST=
+RABBITMQ_PORT=
+RABBITMQ_USERNAME=
+RABBITMQ_PASSWORD=
+RABBITMQ_EMAIL_SENDER_QUEUE=
 
-RABBITMQ_HOST=rabbitmq
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
-RABBITMQ_EMAIL_SENDER_QUEUE=email_sender_queue
-
-RABBITMQ_PORT_ADMIN=15672
+RABBITMQ_PORT_ADMIN=
 
 ```
 
@@ -106,6 +102,7 @@ RABBITMQ_PORT_ADMIN=15672
 2. Заполни переменные окружения
 3. Подними проект ``docker compose up --build``
 4. Проведи миграции. Либо напрямую в контейнере, либо ``make migrate`` в терминале
+5. Создай очередь в RabbitMQ под названием, которое установил в переменные окружения(RABBITMQ_EMAIL_SENDER_QUEUE)
 
 ## Полезные материалы
 1. Web sessions - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
