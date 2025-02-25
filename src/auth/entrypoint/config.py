@@ -62,10 +62,37 @@ class PostgresConfig:
 
 
 @dataclass
+class RabbitMQConfig:
+    host: str
+    port: int
+    username: str
+    password: str
+
+    email_sender_queue: str
+
+    @staticmethod
+    def from_env() -> "RabbitMQConfig":
+        host = getenv("RABBITMQ_HOST")
+        port = getenv("RABBITMQ_PORT")
+        username = getenv("RABBITMQ_USERNAME")
+        password = getenv("RABBITMQ_PASSWORD")
+        email_sender_queue = getenv("RABBITMQ_EMAIL_SENDER_QUEUE")
+
+        return RabbitMQConfig(
+            host=host,
+            port=int(port),
+            username=username,
+            password=password,
+            email_sender_queue=email_sender_queue,
+        )
+
+
+@dataclass
 class Config:
     redis_config: RedisConfig
     postgres_config: PostgresConfig
     session_config: SessionConfig
+    rabbitmq_config: RabbitMQConfig
 
 
 def create_config() -> Config:
@@ -73,4 +100,5 @@ def create_config() -> Config:
         redis_config=RedisConfig.from_env(),
         postgres_config=PostgresConfig.from_env(),
         session_config=SessionConfig.from_env(),
+        rabbitmq_config=RabbitMQConfig.from_env(),
     )

@@ -8,7 +8,7 @@ log_out_router = APIRouter()
 
 @log_out_router.delete(
     "/logout",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 @inject
 async def logout(interactor: FromDishka[LogOutInteractor]) -> None:

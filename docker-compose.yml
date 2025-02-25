@@ -11,7 +11,10 @@ services:
     networks:
       - custom
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
@@ -32,9 +35,33 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - custom
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
     ports:
       - "2344:${POSTGRES_PORT}"
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    env_file:
+      - ${ENV_FILE:-.env}
+    ports:
+      - "5672:${RABBITMQ_PORT}"
+      - "15672:${RABBITMQ_PORT_ADMIN}"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    networks:
+      - custom
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   custom:

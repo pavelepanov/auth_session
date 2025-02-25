@@ -10,7 +10,7 @@
 # Проект
 ## Технологический стек
 - **Python**: `3.12`
-- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`
+- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`, `faststream[rabbit]`
 - **Development**: `isort`, `ruff`, `pre-commit`
 
 
@@ -32,6 +32,8 @@
   - Вход в аккаунт
 - 'logout' (DELETE): Открыт для **всех**
   - Выход с аккаунта
+- 'verification/{user_id}': Открыт для **всех**
+  - Верификация аккаунта, проходя по ссылке из письма на почте
 
 ### Hello world (`/hello_world`)
 - 'user' (GET): Открыт для **user**
@@ -75,18 +77,23 @@
 
 ## Проект использует переменные окружения, их нужно установить:
 ```
-# POSTGRES settings
 POSTGRES_HOST=
 POSTGRES_PORT=
 POSTGRES_DB=
 POSTGRES_USER=
 POSTGRES_PASS=
 
-# API settings
 BACKEND_PORT=
 
-# SESSION settings
 SESSION_EXPIRATION_MINUTES=
+
+RABBITMQ_HOST=
+RABBITMQ_PORT=
+RABBITMQ_USERNAME=
+RABBITMQ_PASSWORD=
+RABBITMQ_EMAIL_SENDER_QUEUE=
+
+RABBITMQ_PORT_ADMIN=
 ```
 
 ## Как запустить
@@ -94,6 +101,7 @@ SESSION_EXPIRATION_MINUTES=
 2. Заполни переменные окружения
 3. Подними проект ``docker compose up --build``
 4. Проведи миграции. Либо напрямую в контейнере, либо ``make migrate`` в терминале
+5. Создай очередь в RabbitMQ под названием, которое установил в переменные окружения(RABBITMQ_EMAIL_SENDER_QUEUE)
 
 ## Полезные материалы
 1. Web sessions - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
