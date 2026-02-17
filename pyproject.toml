@@ -28,6 +28,20 @@ dev = [
     "python-dotenv>=1.0.1",
     "ruff>=0.9.2",
 ]
+test = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.5.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
 
 [tool.ruff]
 line-length = 88
