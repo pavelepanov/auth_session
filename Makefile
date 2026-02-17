@@ -1,40 +1,89 @@
-BACKEND_NAME=backend
-
-# Файлы окружения
-ENV_DEV=.env
-
+# Конфигурация 
+ENV_FILE=.env
+ENV_DOCKER_FILE=.env.docker
 DC=docker-compose
 COMPOSE_FILE=docker-compose.yml
 
-# Команды Docker Compose
-DC=docker-compose
-COMPOSE_FILE=docker-compose.yml
+GUNICORN_CONF=conf/gunicorn.conf.py
+APP_FACTORY=auth.run:make_app()
 
+BACKEND_SERVICE=backend
+
+# Help 
 .PHONY: help
 help:
-	@echo "Используйте следующие команды:"
-	@echo "  make up-dev        - Запуск проекта в режиме разработки (использует $(ENV_DEV))"
-	@echo "  make down          - Остановление и удаление контейнера"
-	@echo "  make migrate       - Миграция на последнюю версию"
-	@echo "  make restart       - Остановление, запуск контейнера"
+	@echo ""
+	@echo "  Инфраструктура (Docker):"
+	@echo "    make infra-up          — Поднять инфраструктуру (PostgreSQL, RabbitMQ)"
+	@echo "    make infra-down        — Остановить инфраструктуру"
+	@echo ""
+	@echo "  Приложение (локально):"
+	@echo "    make app               — Запустить FastAPI через gunicorn"
+	@echo ""
+	@echo "  Миграции (локально):"
+	@echo "    make migrate           — Применить миграции (alembic upgrade head)"
+	@echo "    make migrate-down      — Откатить последнюю миграцию (alembic downgrade -1)"
+	@echo "    make migrate-create    — Создать новую миграцию (NAME=описание)"
+	@echo ""
+	@echo "  Миграции (через контейнер):"
+	@echo "    make docker-migrate    — Одноразовый контейнер: alembic upgrade head (стек не трогается)"
+	@echo ""
+	@echo "  Полный стек (Docker):"
+	@echo "    make up                — Поднять всё (инфраструктура + backend)"
+	@echo "    make down              — Остановить всё"
+	@echo ""
 
-# Запуск проекта в режиме разработки
-.PHONY: up-dev
-up-dev: ENV_FILE=$(ENV_DEV)
-up-dev:
-	@$(DC) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d
+# Инфраструктура
 
-# Остановка и удаление всех контейнеров
-.PHONY: down
-down:
-	@$(DC) down
+.PHONY: infra-up
+infra-up:
+	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) up -d postgres rabbitmq
 
-# Запуск миграций базы данных
+.PHONY: infra-down
+infra-down:
+	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) down
+
+# Приложение (локально через gunicorn)
+
+.PHONY: app
+app:
+	uv run gunicorn -c $(GUNICORN_CONF) '$(APP_FACTORY)' --reload
+
+# Миграции (локально)
+
 .PHONY: migrate
 migrate:
-	@$(DC) exec $(BACKEND_NAME) alembic upgrade head
+	uv run alembic upgrade head
 
-.PHONY: restart
-restart:
-	@$(DC) down
-	@$(DC) --env-file $(ENV_DEV) -f $(COMPOSE_FILE) up -d
+.PHONY: migrate-down
+migrate-down:
+	uv run alembic downgrade -1
+
+.PHONY: migrate-create
+migrate-create:
+	@if [ -z "$(NAME)" ]; then \
+		echo "Ошибка: укажите NAME. Пример: make migrate-create NAME='add_users_table'"; \
+		exit 1; \
+	fi
+	uv run alembic revision --autogenerate -m "$(NAME)"
+
+# Миграции (через контейнер)
+# Поднимает одноразовый контейнер backend,
+# выполняет миграции, контейнер удаляется.
+# Основной стек не затрагивается.
+
+.PHONY: docker-migrate
+docker-migrate:
+	@echo ">>> Запускаем одноразовый контейнер для миграций..."
+	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) run --rm $(BACKEND_SERVICE) alembic upgrade head
+	@echo ">>> Миграции применены. Контейнер удалён."
+
+# Полный стек (Docker)
+
+.PHONY: up
+up:
+	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) up -d
+
+.PHONY: down
+down:
+	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) down

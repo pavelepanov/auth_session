@@ -33,9 +33,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
     ports:
-      - "2344:${POSTGRES_PORT}"
+      - "5432:${POSTGRES_PORT}"
 
   rabbitmq:
     container_name: rabbitmq
