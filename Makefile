@@ -28,6 +28,9 @@ help:
 	@echo "  Миграции (через контейнер):"
 	@echo "    make docker-migrate    — Одноразовый контейнер: alembic upgrade head (стек не трогается)"
 	@echo ""
+	@echo "  Тесты:"
+	@echo "    make test              — Запустить тесты с покрытием (-n auto)"
+	@echo ""
 	@echo "  Полный стек (Docker):"
 	@echo "    make up                — Поднять всё (инфраструктура + backend)"
 	@echo "    make down              — Остановить всё"
@@ -77,6 +80,12 @@ docker-migrate:
 	@echo ">>> Запускаем одноразовый контейнер для миграций..."
 	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) run --rm $(BACKEND_SERVICE) alembic upgrade head
 	@echo ">>> Миграции применены. Контейнер удалён."
+
+# Тесты
+
+.PHONY: test
+test:
+	uv run pytest tests/ --cov=auth --cov-report=term-missing -n auto
 
 # Полный стек (Docker)
 
