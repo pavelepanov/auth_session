@@ -71,26 +71,12 @@
 - Соблюден принцип инверсии зависимотей
 - Зависимости доставляются при помощи инъекции зависимостей, используя di-framework Dishka
 
-## Проект использует переменные окружения, их нужно установить:
-```
-POSTGRES_HOST=
-POSTGRES_PORT=
-POSTGRES_DB=
-POSTGRES_USER=
-POSTGRES_PASS=
+## Переменные окружения
+Для работы проекта необходимо настроить переменные окружения. В корне проекта подготовлены шаблоны:
+- `.env.example` — используйте для локального запуска сервисов (localhost).
+- `.env.docker.example` — используйте для запуска всего стека через Docker Compose.
 
-BACKEND_PORT=
-
-SESSION_EXPIRATION_MINUTES=
-
-RABBITMQ_HOST=
-RABBITMQ_PORT=
-RABBITMQ_USERNAME=
-RABBITMQ_PASSWORD=
-RABBITMQ_EMAIL_SENDER_QUEUE=
-
-RABBITMQ_PORT_ADMIN=
-```
+Скопируйте нужный шаблон в соответствующий файл (`.env` или `.env.docker`) и заполните актуальные значения перед запуском.
 
 ## Как запустить
 1. Склонируй проект

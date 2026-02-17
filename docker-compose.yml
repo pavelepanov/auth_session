@@ -2,7 +2,7 @@ services:
   backend:
     container_name: backend
     env_file:
-      - ${ENV_FILE:-.env}
+      - ${ENV_FILE:-.env.docker}
     build:
       context: .
       dockerfile: Dockerfile
@@ -15,20 +15,13 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    environment:
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASS: ${POSTGRES_PASS}
-
     command: "gunicorn -c conf/gunicorn.conf.py 'auth.run:make_app()'"
 
   postgres:
     container_name: postgres
     image: postgres:13.0-alpine
     env_file:
-      - ${ENV_FILE:-.env}
+      - ${ENV_FILE:-.env.docker}
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASS}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -48,7 +41,7 @@ services:
     container_name: rabbitmq
     image: rabbitmq:3-management
     env_file:
-      - ${ENV_FILE:-.env}
+      - ${ENV_FILE:-.env.docker}
     ports:
       - "5672:${RABBITMQ_PORT}"
       - "15672:${RABBITMQ_PORT_ADMIN}"

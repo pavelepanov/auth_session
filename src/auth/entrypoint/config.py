@@ -18,25 +18,6 @@ class SessionConfig:
 
 
 @dataclass
-class RedisConfig:
-    host: str
-    port: int
-    ttl: int
-
-    @staticmethod
-    def from_env() -> "RedisConfig":
-        host = getenv("REDIS_HOST")
-        port = getenv("REDIS_PORT")
-        ttl = getenv("REDIS_TTL")
-
-        return RedisConfig(
-            host=host,
-            port=port,
-            ttl=int(ttl),
-        )
-
-
-@dataclass
 class PostgresConfig:
     host: str
     port: int
@@ -89,7 +70,6 @@ class RabbitMQConfig:
 
 @dataclass
 class Config:
-    redis_config: RedisConfig
     postgres_config: PostgresConfig
     session_config: SessionConfig
     rabbitmq_config: RabbitMQConfig
@@ -97,7 +77,6 @@ class Config:
 
 def create_config() -> Config:
     return Config(
-        redis_config=RedisConfig.from_env(),
         postgres_config=PostgresConfig.from_env(),
         session_config=SessionConfig.from_env(),
         rabbitmq_config=RabbitMQConfig.from_env(),
