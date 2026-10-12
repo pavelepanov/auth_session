@@ -19,11 +19,15 @@ CancelReason = NewType("CancelReason", str )
 class Order:
     id: OrderId
     user_id: UserId
-    items: list[OrderItem]
+    items: tuple[OrderItem, ...]
     status: OrderStatus
     created_at: CreatedAt
     updated_at: UpdatedAt
     cancel_reason: CancelReason | None
+
+    def __post_init__(self):
+        if not self.items:
+            raise EmptyOrderError("Order must have at least one item.")
 
     @property
     def total_amount(self) -> Decimal:
@@ -55,10 +59,8 @@ class Order:
 def create_order(
     id: OrderId,
     user_id: UserId,
-    items: list[OrderItem],
+    items: tuple[OrderItem, ...],
 ) -> Order:
-    if not items:
-        raise EmptyOrderError("Order must have at least one item.")
 
     now = CreatedAt(datetime.now(timezone.utc))
     return Order(
