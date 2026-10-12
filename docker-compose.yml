@@ -1,6 +1,6 @@
 services:
   backend:
-    container_name: backend
+    container_name: backendOrder
     env_file:
       - ${ENV_FILE:-.env.docker}
     build:
@@ -18,7 +18,7 @@ services:
     command: "gunicorn -c conf/gunicorn.conf.py 'auth.run:make_app()'"
 
   postgres:
-    container_name: postgres
+    container_name: postgresOrder
     image: postgres:13.0-alpine
     env_file:
       - ${ENV_FILE:-.env.docker}
@@ -37,7 +37,7 @@ services:
       - "5432:${POSTGRES_PORT}"
 
   rabbitmq:
-    container_name: rabbitmq
+    container_name: rabbitmqOrder
     image: rabbitmq:3-management
     env_file:
       - ${ENV_FILE:-.env.docker}
