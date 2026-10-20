@@ -169,3 +169,6 @@ cython_debug/
 
 # IgnoreToDo
 todo/
+
+# Local CodeGraph index and runtime files
+.codegraph/

@@ -85,6 +85,35 @@
 4. Проведи миграции. Либо напрямую в контейнере, либо ``make migrate`` в терминале
 5. Создай очередь в RabbitMQ под названием, которое установил в переменные окружения(RABBITMQ_EMAIL_SENDER_QUEUE)
 
+## CodeGraph для работы с AI-агентами
+
+Проект использует локальный CodeGraph, чтобы Codex, Claude Code, Gemini, Cursor
+и другие AI-агенты могли находить связи между файлами, символами и вызовами без
+повторного чтения всего репозитория.
+
+После клонирования перейди в корень проекта, установи CLI и один раз создай
+индекс:
+
+```bash
+npm install -g @colbymchenry/codegraph
+codegraph init
+codegraph status
+```
+
+Команда `codegraph status` должна показать актуальный индекс. Данные хранятся
+только локально в `.codegraph/` и не попадают в Git. Индекс автоматически
+обновляется при изменении файлов.
+
+Любой агент может использовать универсальную команду:
+
+```bash
+codegraph explore "authentication login flow"
+```
+
+Нативное MCP-подключение настраивается отдельно в используемом клиенте и не
+хранится в репозитории. Правила работы AI-агентов с проектом описаны в
+`AGENTS.md`.
+
 ## Полезные материалы
 1. Web sessions - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
 2. OAuth2 - https://auth0.com/docs и https://oauth.net/

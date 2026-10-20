@@ -1,0 +1,120 @@
+# Project guide for coding agents
+
+## What this repository is
+
+This is a Python 3.12 authentication service built with FastAPI. It implements
+server-side web sessions, signup/login/logout, account verification, and
+role-based access for `user` and `admin`. PostgreSQL stores users and sessions;
+RabbitMQ carries verification-email messages.
+
+The application follows Clean Architecture. Keep dependencies pointing inward:
+
+```text
+HTTP / infrastructure -> application -> domain
+          entrypoint wires implementations to interfaces
+```
+
+- `domain/`: persistence-free entities, value types, roles, and domain errors.
+- `application/`: use-case interactors, ports in `interfaces/`, validators, and
+  application errors. It may depend on `domain`, never on FastAPI, Dishka,
+  SQLAlchemy, RabbitMQ, or concrete adapters.
+- `infrastructure/`: implementations of application ports and imperative
+  SQLAlchemy mappings.
+- `presentation/`: FastAPI routes, cookie request adapter, ASGI middleware, and
+  HTTP error translation. Routes should only translate input/output and invoke
+  an interactor.
+- `entrypoint/`: environment configuration, Dishka providers, and application
+  composition. `auth.run:make_app()` is the application factory.
+
+## Find code efficiently
+
+This repository uses a local CodeGraph index. Before broad `grep`/`find` calls
+or opening many files, use your agent's CodeGraph MCP integration when it is
+configured. The agent-independent shell interface is always:
+
+```bash
+codegraph explore "<symbol or question>"
+codegraph status
+```
+
+The index lives in `.codegraph/`, is machine-local, and is ignored by Git. No
+agent-specific configuration is committed to this repository. If the index is
+absent, install the CLI with `npm install -g @colbymchenry/codegraph` and run
+`codegraph init`. Developers may connect that CLI to Codex, Claude Code, Gemini,
+Cursor, or another MCP client using the client's own local configuration. If
+CodeGraph is unavailable, fall back to `rg` and targeted file reads.
+
+When available, use Context7 when implementation depends on current behavior
+of FastAPI, Dishka, SQLAlchemy, Alembic, FastStream, or another external
+library.
+
+## Local setup and common commands
+
+Dependencies and the lock file are managed with `uv`:
+
+```bash
+uv sync --python 3.12 --all-groups
+cp .env.example .env                 # fill every value
+make infra-up                        # PostgreSQL + RabbitMQ
+make migrate                         # alembic upgrade head
+make app                             # reload-enabled Gunicorn on localhost
+```
+
+For the complete containerized stack, copy `.env.docker.example` to
+`.env.docker`, fill it, then run `make up`. Useful commands are documented by
+`make help`.
+
+Required settings are PostgreSQL host/port/database/user/password, RabbitMQ
+host/ports/credentials/email queue, `BACKEND_PORT`, and
+`SESSION_EXPIRATION_MINUTES`. Never commit `.env` or `.env.docker`.
+
+## Rules for changes
+
+- Preserve the layer boundaries above. Domain entities must stay independent
+  of frameworks and persistence.
+- A new use case normally consists of request/response dataclasses and an
+  interactor in `application/interactors/`. Add an application interface when
+  the use case needs I/O, implement it under `infrastructure/adapters/`, bind it
+  in `entrypoint/ioc/`, then expose it through a thin presentation route.
+- Interactors own business decisions and transaction boundaries. Persist
+  through gateways and call `TransactionManager.commit()` only after the whole
+  use case succeeds.
+- SQLAlchemy uses imperative mappings. Schema changes must keep the domain
+  entity, `infrastructure/persistence_sqla/mappings/`, and an Alembic migration
+  consistent. Create migrations with
+  `make migrate-create NAME='short_description'` and review generated SQL.
+- Register new interactors/adapters in the appropriate Dishka provider. Use
+  request scope for request state and database sessions; use app scope for
+  shared configuration, engines, sessionmakers, and the broker.
+- Raise typed domain/application errors from inner layers. Map new HTTP-facing
+  errors centrally in `presentation/http/base/error_handler.py`; do not build
+  error responses inside interactors.
+- Session identity is stored in the `id` HTTP-only cookie. Routes and
+  interactors communicate cookie changes through `RequestManager`; the ASGI
+  middleware writes/deletes the actual header. Preserve `Secure` and
+  `SameSite` behavior deliberately when changing authentication.
+- Keep async I/O async. Do not place blocking database, broker, or password
+  operations directly in route handlers.
+- Follow the existing typed style, 88-character line length, and Ruff import
+  ordering. Avoid unrelated formatting or refactors.
+
+## Verification
+
+Run the smallest relevant tests while iterating, then the full checks before
+finishing:
+
+```bash
+uv run pytest tests/unit/application/interactors/test_log_in.py
+make test
+uv run ruff check .
+uv run ruff format --check .
+```
+
+Tests mirror the source tree. Unit tests should mock application interfaces and
+cover success plus business-error paths. Add integration coverage when behavior
+depends on real SQLAlchemy mappings, migrations, cookies, middleware, or broker
+wiring.
+
+Before handing off a change, confirm that migrations are intentional, no secret
+or local environment file is tracked, the CodeGraph index is current, and the
+working-tree diff contains only task-related changes.
