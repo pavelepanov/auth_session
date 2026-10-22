@@ -1,14 +1,14 @@
-from http.cookies import SimpleCookie
-from typing import Any, Literal
-
-from fastapi import FastAPI
 from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
-from starlette.types import Message, Receive, Scope, Send
+from starlette.responses import Response
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+from auth.domain.entities.session import SessionToken
+from auth.presentation.http.base.cookie_params import CookieParams
 
 
 class ASGIAuthMiddleware:
-    def __init__(self, app: FastAPI):
+    def __init__(self, app: ASGIApp):
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -25,52 +25,38 @@ class ASGIAuthMiddleware:
 
             headers: MutableHeaders = MutableHeaders(scope=message)
 
-            self._set_id_cookie(request, headers)
-            self._delete_id_cookie(request, headers)
+            self._apply_session_cookie(request, headers)
 
             await send(message)
 
         await self.app(scope, receive, modify_cookies)
 
-    def _set_id_cookie(
-        self,
-        request: Request,
-        headers: MutableHeaders,
-    ) -> None:
-        new_session_id: str | None = getattr(request.state, "new_session_id", None)
-
-        if new_session_id is None:
+    def _apply_session_cookie(self, request: Request, headers: MutableHeaders) -> None:
+        token: SessionToken | None = getattr(request.state, "new_session_token", None)
+        delete_token: bool = getattr(request.state, "delete_session_token", False)
+        if token is None and not delete_token:
             return
 
-        cookie_params: dict[str, Any] = getattr(request.state, "cookie_params", None)
+        params: CookieParams = request.state.session_cookie_params
+        response = Response()
+        if token is None:
+            response.delete_cookie(
+                params.name,
+                path=params.path,
+                secure=params.secure,
+                httponly=params.httponly,
+                samesite=params.samesite,
+            )
+        else:
+            response.set_cookie(
+                params.name,
+                token,
+                max_age=params.max_age,
+                path=params.path,
+                secure=params.secure,
+                httponly=params.httponly,
+                samesite=params.samesite,
+            )
 
-        is_cookie_secure: bool = cookie_params.get("secure", False)
-        cookie_samesite: Literal["strict"] | None = cookie_params.get("samesite", None)
-
-        cookie: SimpleCookie = SimpleCookie()
-
-        cookie["id"] = new_session_id
-        cookie["id"]["path"] = "/"
-        cookie["id"]["httponly"] = True
-
-        if is_cookie_secure:
-            cookie["id"]["secure"] = True
-
-        if cookie_samesite is not None:
-            cookie["id"]["samesite"] = cookie_samesite
-
-        headers.append("Set-Cookie", cookie.output(header="").strip())
-
-    def _delete_id_cookie(self, request: Request, headers: MutableHeaders) -> None:
-        is_delete_id: bool = getattr(request.state, "delete_session_id", False)
-        if not is_delete_id:
-            return
-
-        cookie: SimpleCookie = SimpleCookie()
-
-        cookie["id"] = ""
-        cookie["id"]["path"] = "/"
-        cookie["id"]["httponly"] = True
-        cookie["id"]["max-age"] = 0
-
-        headers.append("Set-Cookie", cookie.output(header="").strip())
+        for value in response.headers.getlist("set-cookie"):
+            headers.append("set-cookie", value)

@@ -1,12 +1,13 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from auth.domain.user_role import UserRoleEnum
+from auth.domain.entities.user import User
 
 
 class IdentityProvider(Protocol):
     @abstractmethod
-    async def is_authenticated(self) -> bool: ...
-
-    @abstractmethod
-    async def get_role(self) -> UserRoleEnum: ...
+    async def get_current_user(self) -> User | None:
+        """Вызывать до бизнес-изменений: обновление или удаление сессии
+        может вызвать commit общей транзакции.
+        """
+        ...

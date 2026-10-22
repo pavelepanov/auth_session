@@ -20,9 +20,14 @@ from auth.presentation.http.base.root_router import root_router
 def make_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        await broker.connect()
-        yield
-        await broker.close()
+        try:
+            await broker.connect()
+            yield
+        finally:
+            try:
+                await async_ioc_container.close()
+            finally:
+                await broker.close()
 
     config = create_config()
     broker = create_broker(config=config.rabbitmq_config)

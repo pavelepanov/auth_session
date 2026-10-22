@@ -1,7 +1,7 @@
 # Конфигурация 
 ENV_FILE=.env
 ENV_DOCKER_FILE=.env.docker
-DC=docker-compose
+DC=docker compose
 COMPOSE_FILE=docker-compose.yml
 
 GUNICORN_CONF=conf/gunicorn.conf.py
@@ -23,7 +23,7 @@ help:
 	@echo "  Миграции (локально):"
 	@echo "    make migrate           — Применить миграции (alembic upgrade head)"
 	@echo "    make migrate-down      — Откатить последнюю миграцию (alembic downgrade -1)"
-	@echo "    make migrate-create    — Создать новую миграцию (NAME=описание)"
+	@echo "    make migrate-create    — Создать миграцию (NAME='0002_add_feature')"
 	@echo ""
 	@echo "  Миграции (через контейнер):"
 	@echo "    make docker-migrate    — Одноразовый контейнер: alembic upgrade head (стек не трогается)"
@@ -50,25 +50,25 @@ infra-down:
 
 .PHONY: app
 app:
-	uv run gunicorn -c $(GUNICORN_CONF) '$(APP_FACTORY)' --reload
+	uv run --env-file "$(ENV_FILE)" gunicorn -c $(GUNICORN_CONF) '$(APP_FACTORY)' --reload
 
 # Миграции (локально)
 
 .PHONY: migrate
 migrate:
-	uv run alembic upgrade head
+	uv run --env-file "$(ENV_FILE)" alembic upgrade head
 
 .PHONY: migrate-down
 migrate-down:
-	uv run alembic downgrade -1
+	uv run --env-file "$(ENV_FILE)" alembic downgrade -1
 
 .PHONY: migrate-create
 migrate-create:
 	@if [ -z "$(NAME)" ]; then \
-		echo "Ошибка: укажите NAME. Пример: make migrate-create NAME='add_users_table'"; \
+		echo "Ошибка: укажите NAME. Пример: make migrate-create NAME='0002_add_feature'"; \
 		exit 1; \
 	fi
-	uv run alembic revision --autogenerate -m "$(NAME)"
+	uv run --env-file "$(ENV_FILE)" alembic revision --autogenerate -m "$(NAME)"
 
 # Миграции (через контейнер)
 # Поднимает одноразовый контейнер backend,

@@ -1,5 +1,2 @@
-import re
-
-raw_password_pattern = re.compile(
-    r"^(?=.*[0-9].*)(?=.*[a-z].*)(?=.*[A-Z].*)[0-9a-zA-Z]{8,}$"
-)
+MIN_PASSWORD_LENGTH = 15
+MAX_PASSWORD_LENGTH = 128

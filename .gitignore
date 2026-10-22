@@ -122,6 +122,9 @@ celerybeat.pid
 # Environments
 .env
 .env.docker
+.env.*
+!.env.example
+!.env.docker.example
 .venv
 env/
 venv/
@@ -172,3 +175,8 @@ todo/
 
 # Local CodeGraph index and runtime files
 .codegraph/
+
+# Локальные файлы инструментов и cookie
+.ruff_cache/
+.DS_Store
+*.cookies

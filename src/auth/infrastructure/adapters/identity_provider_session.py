@@ -1,101 +1,65 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
-from auth.application.errors import AuthenticationError
+from auth.application.interfaces.client_session_transport import ClientSessionTransport
 from auth.application.interfaces.identity_provider import IdentityProvider
-from auth.application.interfaces.request_manager import RequestManager
 from auth.application.interfaces.session_data_gateway import SessionDataGateway
+from auth.application.interfaces.session_token_hasher import SessionTokenHasher
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
-from auth.domain.entities.session import Session, SessionId
-from auth.domain.user_role import UserRoleEnum
+from auth.domain.entities.session import Session
+from auth.domain.entities.user import User
 from auth.entrypoint.config import SessionConfig
 
 
 class IdentityProviderSession(IdentityProvider):
-    """
-    Повторение кода оправдано фактом:
-    обновление срока истечения жизни сессии зависит от сценария.
-    Это не нарушение DRY, это следование бизнес-сценариям.
-    """
-
     def __init__(
         self,
         session_data_gateway: SessionDataGateway,
-        request_manager: RequestManager,
+        client_session_transport: ClientSessionTransport,
+        session_token_hasher: SessionTokenHasher,
         session_config: SessionConfig,
         transaction_manager: TransactionManager,
         user_data_gateway: UserDataGateway,
     ):
         self._session_data_gateway = session_data_gateway
-        self._request_manager = request_manager
+        self._client_session_transport = client_session_transport
+        self._session_token_hasher = session_token_hasher
         self._session_config = session_config
         self._transaction_manager = transaction_manager
         self._user_data_gateway = user_data_gateway
 
-    async def is_authenticated(self) -> bool:
-        session_id: SessionId = self._request_manager.get_session_id_from_request()
+    async def get_current_user(self) -> User | None:
+        token = await self._client_session_transport.get_session()
+        if token is None:
+            return None
 
-        if session_id is None:
-            return False
-
-        session: Session | None = await self._session_data_gateway.read_by_id(
-            session_id=session_id
-        )
-
+        token_hash = self._session_token_hasher.hash(token)
+        session = await self._session_data_gateway.read_by_token_hash(token_hash)
         if session is None:
-            return False
+            await self._client_session_transport.clear_session()
+            return None
 
-        if session.expiration < datetime.now(timezone.utc):
-            await self._session_data_gateway.delete_session(session.id)
-            self._request_manager.delete_session_from_request()
+        if session.expires_at <= datetime.now(UTC):
+            await self._discard_session(session)
+            return None
 
+        user = await self._user_data_gateway.read_by_id(session.user_id)
+        if user is None or not user.is_active:
+            await self._discard_session(session)
+            return None
+
+        now = datetime.now(UTC)
+        expiration_delta = timedelta(minutes=self._session_config.expiration_minutes)
+        if session.expires_at - now <= expiration_delta / 2:
+            await self._session_data_gateway.prolong(
+                session, expires_at=now + expiration_delta
+            )
             await self._transaction_manager.commit()
+            await self._client_session_transport.set_session(token)
 
-            return False
+        return user
 
-        new_expiration: datetime = datetime.now(timezone.utc) + timedelta(
-            minutes=self._session_config.expiration_minutes
-        )
-
-        await self._session_data_gateway.prolong_expiration(
-            session_id=session_id, expiration=new_expiration
-        )
-
+    async def _discard_session(self, session: Session) -> None:
+        await self._session_data_gateway.delete(session)
         await self._transaction_manager.commit()
-
-        return True
-
-    async def get_role(self) -> UserRoleEnum:
-        session_id: SessionId = self._request_manager.get_session_id_from_request()
-
-        if session_id is None:
-            raise AuthenticationError("You are not authenticated.")
-
-        session: Session | None = await self._session_data_gateway.read_by_id(
-            session_id=session_id
-        )
-
-        if session is None:
-            raise AuthenticationError("You are not authenticated.")
-
-        if session.expiration < datetime.now(timezone.utc):
-            await self._session_data_gateway.delete_session(session.id)
-            self._request_manager.delete_session_from_request()
-
-            await self._transaction_manager.commit()
-
-            return False
-
-        new_expiration: datetime = datetime.now(timezone.utc) + timedelta(
-            minutes=self._session_config.expiration_minutes
-        )
-
-        await self._session_data_gateway.prolong_expiration(
-            session_id=session_id, expiration=new_expiration
-        )
-
-        role = await self._user_data_gateway.get_role(user_id=session.user_id)
-
-        await self._transaction_manager.commit()
-
-        return role
+        await self._client_session_transport.clear_session()

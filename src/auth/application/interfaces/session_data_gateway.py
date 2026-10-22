@@ -2,8 +2,7 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import Protocol
 
-from auth.domain.entities.session import Session, SessionId
-from auth.domain.entities.user import UserId
+from auth.domain.entities.session import Session, SessionTokenHash
 
 
 class SessionDataGateway(Protocol):
@@ -11,15 +10,12 @@ class SessionDataGateway(Protocol):
     async def add(self, session: Session) -> None: ...
 
     @abstractmethod
-    async def read_by_id(self, session_id: SessionId) -> Session | None: ...
+    async def read_by_token_hash(
+        self, token_hash: SessionTokenHash
+    ) -> Session | None: ...
 
     @abstractmethod
-    async def get_user_id(self, session_id: SessionId) -> UserId | None: ...
+    async def delete(self, session: Session) -> None: ...
 
     @abstractmethod
-    async def delete_session(self, session_id: SessionId) -> None: ...
-
-    @abstractmethod
-    async def prolong_expiration(
-        self, session_id: SessionId, expiration: datetime
-    ) -> None: ...
+    async def prolong(self, session: Session, expires_at: datetime) -> None: ...

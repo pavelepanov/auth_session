@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from unicodedata import normalize
 from uuid import UUID
 
+from auth.application.constants import MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH
 from auth.application.errors import AlreadyExists, InvalidPassword, SignUpError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
@@ -13,8 +15,8 @@ from auth.domain.entities.user import (
     PasswordHash,
     RawPassword,
     User,
+    UserEmail,
     UserId,
-    UserName,
     create_user,
 )
 from auth.domain.user_role import UserRoleEnum
@@ -22,7 +24,7 @@ from auth.domain.user_role import UserRoleEnum
 
 @dataclass
 class SignUpRequest:
-    username: str
+    email: str
     raw_password: str
 
 
@@ -49,37 +51,38 @@ class SignUpInteractor:
         self._sender_letter = sender_letter
 
     async def __call__(self, request_data: SignUpRequest) -> SignUpResponse:
-        is_authenticated: bool = await self._identity_provider.is_authenticated()
-        if is_authenticated:
+        current_user = await self._identity_provider.get_current_user()
+        if current_user is not None:
             raise SignUpError("You are already authenticated.")
 
         user_id: UserId = self._user_id_generator()
-        username: UserName = UserName(request_data.username)
-        raw_password: RawPassword = RawPassword(request_data.raw_password)
-        password_hash: PasswordHash = self._password_hasher.hash(
-            raw_password=raw_password
+        email: UserEmail = UserEmail(request_data.email.strip().lower())
+        raw_password: RawPassword = RawPassword(
+            normalize("NFC", request_data.raw_password)
         )
         role: UserRoleEnum = UserRoleEnum.USER
         is_verified: bool = False
 
-        user: User | None = await self._user_data_gateway.read_by_username(
-            username=username
-        )
+        user: User | None = await self._user_data_gateway.read_by_email(email=email)
 
         if user is not None:
-            raise AlreadyExists("User with this username already exists.")
+            raise AlreadyExists("User with this email already exists.")
 
         is_valid_raw_password: bool = check_valid_raw_password(raw_password)
 
         if not is_valid_raw_password:
             raise InvalidPassword(
-                "Password should have at least one number, one letter in lowercase,"
-                "one letter in uppercase, consists of at least 8 symbols"
+                f"Password must contain between {MIN_PASSWORD_LENGTH} and "
+                f"{MAX_PASSWORD_LENGTH} characters and be valid Unicode."
             )
+
+        password_hash: PasswordHash = self._password_hasher.hash(
+            raw_password=raw_password
+        )
 
         user: User = create_user(
             id=user_id,
-            username=username,
+            email=email,
             password_hash=password_hash,
             role=role,
             is_verified=is_verified,

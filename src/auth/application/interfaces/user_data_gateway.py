@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from auth.domain.entities.user import User, UserId, UserName
-from auth.domain.user_role import UserRoleEnum
+from auth.domain.entities.user import User, UserEmail, UserId
 
 
 class UserDataGateway(Protocol):
@@ -13,7 +12,4 @@ class UserDataGateway(Protocol):
     async def read_by_id(self, user_id: UserId) -> User | None: ...
 
     @abstractmethod
-    async def read_by_username(self, username: UserName) -> User | None: ...
-
-    @abstractmethod
-    async def get_role(self, user_id: UserId) -> UserRoleEnum | None: ...
+    async def read_by_email(self, email: UserEmail) -> User | None: ...

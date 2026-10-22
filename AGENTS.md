@@ -64,9 +64,17 @@ For the complete containerized stack, copy `.env.docker.example` to
 `.env.docker`, fill it, then run `make up`. Useful commands are documented by
 `make help`.
 
+Local application and migration targets load `.env` with `uv run --env-file`;
+override the path with `ENV_FILE`. Application configuration reads only the
+process environment and must not import or call python-dotenv.
+Keep configuration in `entrypoint/config.py` as plain dataclasses with
+`from_env()` methods. Configuration types should depend only on the standard
+library.
+
 Required settings are PostgreSQL host/port/database/user/password, RabbitMQ
 host/ports/credentials/email queue, `BACKEND_PORT`, and
-`SESSION_EXPIRATION_MINUTES`. Never commit `.env` or `.env.docker`.
+`SESSION_EXPIRATION_MINUTES` and `SESSION_TOKEN_HASH_SECRET`.
+Never commit `.env` or `.env.docker`.
 
 ## Rules for changes
 
@@ -77,22 +85,36 @@ host/ports/credentials/email queue, `BACKEND_PORT`, and
   the use case needs I/O, implement it under `infrastructure/adapters/`, bind it
   in `entrypoint/ioc/`, then expose it through a thin presentation route.
 - Interactors own business decisions and transaction boundaries. Persist
-  through gateways and call `TransactionManager.commit()` only after the whole
-  use case succeeds.
-- SQLAlchemy uses imperative mappings. Schema changes must keep the domain
+  through gateways and commit business changes only after the use case succeeds.
+  `IdentityProvider.get_current_user()` must run FIRST, before business changes:
+  it may commit session renewal or removal on the same database session. This
+  session maintenance shares the transaction with the interactor.
+- SQLAlchemy uses imperative mappings of the anemic domain dataclasses. Adapter
+  queries must use these domain entities and their mapped attributes, never
+  import or query `Table` objects from `persistence_sqla/mappings/`. Keep direct
+  table access in persistence mappings, migrations, and schema tooling.
+  Domain dataclasses must remain free of SQLAlchemy imports and declarations.
+  Schema changes must keep the domain
   entity, `infrastructure/persistence_sqla/mappings/`, and an Alembic migration
   consistent. Create migrations with
-  `make migrate-create NAME='short_description'` and review generated SQL.
+  `make migrate-create NAME='0002_short_description'`, choosing the next numeric
+  filename prefix, and review generated SQL. Keep Alembic revision identifiers
+  and `down_revision` links independent of the numbered filenames.
+  Store Python enum values as strings with `native_enum=False`, without native
+  PostgreSQL enum types. Session timestamps use `DateTime(timezone=True)` and
+  timezone-aware UTC datetimes in application code.
 - Register new interactors/adapters in the appropriate Dishka provider. Use
   request scope for request state and database sessions; use app scope for
   shared configuration, engines, sessionmakers, and the broker.
 - Raise typed domain/application errors from inner layers. Map new HTTP-facing
   errors centrally in `presentation/http/base/error_handler.py`; do not build
   error responses inside interactors.
-- Session identity is stored in the `id` HTTP-only cookie. Routes and
-  interactors communicate cookie changes through `RequestManager`; the ASGI
-  middleware writes/deletes the actual header. Preserve `Secure` and
-  `SameSite` behavior deliberately when changing authentication.
+- A random bearer token is stored in the `__Host-session` HTTP-only cookie;
+  PostgreSQL stores only its HMAC-SHA256 hash plus an independent UUID. Multiple
+  sessions per user are allowed. Interactors communicate cookie changes through
+  `ClientSessionTransport`; ASGI middleware emits the final cookie action.
+  Set cookies only after successful commit. Preserve Secure and SameSite.
+  For local HTTP set SESSION_COOKIE_NAME=session and SESSION_COOKIE_SECURE=false.
 - Keep async I/O async. Do not place blocking database, broker, or password
   operations directly in route handlers.
 - Follow the existing typed style, 88-character line length, and Ruff import

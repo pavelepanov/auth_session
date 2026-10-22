@@ -10,7 +10,7 @@ description = "Web sessions service"
 license = { file = "LICENSE" }
 dependencies = [
     "alembic>=1.14.1",
-    "bcrypt>=4.2.1",
+    "argon2-cffi>=25.1.0",
     "dishka>=1.4.2",
     "fastapi[standard]>=0.115.7",
     "faststream[cli,rabbit]>=0.5.34",
@@ -54,5 +54,5 @@ exclude = ["alembic"]
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["exam_tutor"]
+known_first_party = ["auth"]
 skip = ["alembic"]

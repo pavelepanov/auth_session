@@ -1,20 +1,31 @@
 from dataclasses import dataclass
 from os import getenv
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from urllib.parse import quote
 
 
 @dataclass
 class SessionConfig:
     expiration_minutes: int
+    token_hash_secret: str
+    cookie_name: str = "__Host-session"
+    cookie_secure: bool = True
+    cookie_samesite: str = "lax"
 
     @staticmethod
     def from_env() -> "SessionConfig":
         expiration_minutes = getenv("SESSION_EXPIRATION_MINUTES")
+        token_hash_secret = getenv("SESSION_TOKEN_HASH_SECRET")
+        cookie_name = getenv("SESSION_COOKIE_NAME", "__Host-session")
+        cookie_secure = getenv("SESSION_COOKIE_SECURE", "true").lower() == "true"
+        cookie_samesite = getenv("SESSION_COOKIE_SAMESITE", "lax")
 
-        return SessionConfig(expiration_minutes=int(expiration_minutes))
+        return SessionConfig(
+            expiration_minutes=int(expiration_minutes),
+            token_hash_secret=token_hash_secret,
+            cookie_name=cookie_name,
+            cookie_secure=cookie_secure,
+            cookie_samesite=cookie_samesite,
+        )
 
 
 @dataclass
@@ -35,7 +46,10 @@ class PostgresConfig:
         user = getenv("POSTGRES_USER")
         password = getenv("POSTGRES_PASS")
 
-        uri = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{db}"
+        uri = (
+            f"postgresql+psycopg://"
+            f"{quote(user, safe='')}:{quote(password, safe='')}@{host}:{port}/{db}"
+        )
 
         return PostgresConfig(
             uri=uri, host=host, port=port, db=db, user=user, password=password

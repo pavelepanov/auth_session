@@ -1,8 +1,14 @@
 from dataclasses import dataclass
 from typing import Literal
 
+SameSite = Literal["lax", "strict", "none"]
 
-@dataclass
+
+@dataclass(frozen=True)
 class CookieParams:
-    secure: bool
-    samesite: Literal["strict"] | None = None
+    max_age: int
+    name: str = "__Host-session"
+    secure: bool = True
+    httponly: bool = True
+    samesite: SameSite = "lax"
+    path: str = "/"
