@@ -6,7 +6,7 @@
 # Проект
 ## Технологический стек
 - **Python**: `3.12`
-- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`, `faststream[rabbit]`
+- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`
 - **Development**: `isort`, `ruff`, `pre-commit`
 
 
@@ -35,11 +35,6 @@
 `SESSION_COOKIE_SECURE=false`.
 
 ## API
-<p align="center">
-  <img src="docs/API.png" />
-  <br><em>Handlers</em>
-</p>
-
 ### General
 - '/': Открыт для **всех**
    - Перенаправляет на Swagger документацию
@@ -52,9 +47,6 @@
   - Вход в аккаунт
 - 'logout' (DELETE): Открыт для **всех**
   - Выход с аккаунта
-- 'verification/{user_id}': Открыт для **всех**
-  - Верификация аккаунта, проходя по ссылке из письма на почте
-
 ### Hello world (`/hello_world`)
 - 'user' (GET): Открыт для **user**
   - return: Hello world by user
@@ -110,7 +102,6 @@
 2. Заполни переменные окружения
 3. Подними проект ``docker compose up --build``
 4. Проведи миграции. Либо напрямую в контейнере, либо ``make migrate`` в терминале
-5. Создай очередь в RabbitMQ под названием, которое установил в переменные окружения(RABBITMQ_EMAIL_SENDER_QUEUE)
 
 ## CodeGraph для работы с AI-агентами
 

@@ -21,7 +21,6 @@ users_table = Table(
         ),
         nullable=False,
     ),
-    Column("is_verified", Boolean, nullable=False),
 )
 
 Index(

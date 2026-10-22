@@ -3,9 +3,8 @@
 ## What this repository is
 
 This is a Python 3.12 authentication service built with FastAPI. It implements
-server-side web sessions, signup/login/logout, account verification, and
-role-based access for `user` and `admin`. PostgreSQL stores users and sessions;
-RabbitMQ carries verification-email messages.
+server-side web sessions, signup/login/logout, and role-based access for `user`
+and `admin`. PostgreSQL stores users and sessions.
 
 The application follows Clean Architecture. Keep dependencies pointing inward:
 
@@ -17,7 +16,7 @@ HTTP / infrastructure -> application -> domain
 - `domain/`: persistence-free entities, value types, roles, and domain errors.
 - `application/`: use-case interactors, ports in `interfaces/`, validators, and
   application errors. It may depend on `domain`, never on FastAPI, Dishka,
-  SQLAlchemy, RabbitMQ, or concrete adapters.
+  SQLAlchemy, or concrete adapters.
 - `infrastructure/`: implementations of application ports and imperative
   SQLAlchemy mappings.
 - `presentation/`: FastAPI routes, cookie request adapter, ASGI middleware, and
@@ -45,8 +44,7 @@ Cursor, or another MCP client using the client's own local configuration. If
 CodeGraph is unavailable, fall back to `rg` and targeted file reads.
 
 When available, use Context7 when implementation depends on current behavior
-of FastAPI, Dishka, SQLAlchemy, Alembic, FastStream, or another external
-library.
+of FastAPI, Dishka, SQLAlchemy, Alembic, or another external library.
 
 ## Local setup and common commands
 
@@ -55,7 +53,7 @@ Dependencies and the lock file are managed with `uv`:
 ```bash
 uv sync --python 3.12 --all-groups
 cp .env.example .env                 # fill every value
-make infra-up                        # PostgreSQL + RabbitMQ
+make infra-up                        # PostgreSQL
 make migrate                         # alembic upgrade head
 make app                             # reload-enabled Gunicorn on localhost
 ```
@@ -71,9 +69,8 @@ Keep configuration in `entrypoint/config.py` as plain dataclasses with
 `from_env()` methods. Configuration types should depend only on the standard
 library.
 
-Required settings are PostgreSQL host/port/database/user/password, RabbitMQ
-host/ports/credentials/email queue, `BACKEND_PORT`, and
-`SESSION_EXPIRATION_MINUTES` and `SESSION_TOKEN_HASH_SECRET`.
+Required settings are PostgreSQL host/port/database/user/password,
+`BACKEND_PORT`, `SESSION_EXPIRATION_MINUTES`, and `SESSION_TOKEN_HASH_SECRET`.
 Never commit `.env` or `.env.docker`.
 
 ## Rules for changes
@@ -105,7 +102,7 @@ Never commit `.env` or `.env.docker`.
   timezone-aware UTC datetimes in application code.
 - Register new interactors/adapters in the appropriate Dishka provider. Use
   request scope for request state and database sessions; use app scope for
-  shared configuration, engines, sessionmakers, and the broker.
+  shared configuration, engines, and sessionmakers.
 - Raise typed domain/application errors from inner layers. Map new HTTP-facing
   errors centrally in `presentation/http/base/error_handler.py`; do not build
   error responses inside interactors.

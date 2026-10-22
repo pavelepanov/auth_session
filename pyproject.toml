@@ -13,7 +13,6 @@ dependencies = [
     "argon2-cffi>=25.1.0",
     "dishka>=1.4.2",
     "fastapi[standard]>=0.115.7",
-    "faststream[cli,rabbit]>=0.5.34",
     "greenlet>=3.1.1",
     "gunicorn>=23.0.0",
     "psycopg[async,binary]>=3.2.4",

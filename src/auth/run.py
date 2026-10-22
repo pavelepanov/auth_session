@@ -11,7 +11,6 @@ from auth.entrypoint.setup import (
     configure_logging,
     create_app,
     create_async_ioc_container,
-    create_broker,
 )
 from auth.infrastructure.persistence_sqla.mappings.map import map_tables
 from auth.presentation.http.base.root_router import root_router
@@ -21,16 +20,11 @@ def make_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         try:
-            await broker.connect()
             yield
         finally:
-            try:
-                await async_ioc_container.close()
-            finally:
-                await broker.close()
+            await async_ioc_container.close()
 
     config = create_config()
-    broker = create_broker(config=config.rabbitmq_config)
 
     app = create_app(lifespan=lifespan)
     map_tables()
@@ -39,7 +33,6 @@ def make_app() -> FastAPI:
     async_ioc_container: AsyncContainer = create_async_ioc_container(
         providers=(*get_providers(),),
         config=config,
-        broker=broker,
     )
 
     setup_dishka(container=async_ioc_container, app=app)

@@ -14,7 +14,7 @@ BACKEND_SERVICE=backend
 help:
 	@echo ""
 	@echo "  Инфраструктура (Docker):"
-	@echo "    make infra-up          — Поднять инфраструктуру (PostgreSQL, RabbitMQ)"
+	@echo "    make infra-up          — Поднять инфраструктуру (PostgreSQL)"
 	@echo "    make infra-down        — Остановить инфраструктуру"
 	@echo ""
 	@echo "  Приложение (локально):"
@@ -40,7 +40,7 @@ help:
 
 .PHONY: infra-up
 infra-up:
-	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) up -d postgres rabbitmq
+	@$(DC) --env-file $(ENV_DOCKER_FILE) -f $(COMPOSE_FILE) up -d postgres
 
 .PHONY: infra-down
 infra-down:

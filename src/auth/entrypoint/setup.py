@@ -4,10 +4,8 @@ from typing import Iterable
 
 from dishka import AsyncContainer, Provider, make_async_container
 from fastapi import APIRouter, FastAPI
-from faststream.rabbit import RabbitBroker
-from faststream.security import SASLPlaintext
 
-from auth.entrypoint.config import Config, RabbitMQConfig
+from auth.entrypoint.config import Config
 from auth.presentation.http.base.error_handler import init_error_handlers
 from auth.presentation.http.middlewares.asgi_auth import ASGIAuthMiddleware
 
@@ -19,11 +17,9 @@ def create_app(lifespan: asynccontextmanager) -> FastAPI:
 
 
 def create_async_ioc_container(
-    providers: Iterable[Provider], config: Config, broker: RabbitBroker
+    providers: Iterable[Provider], config: Config
 ) -> AsyncContainer:
-    return make_async_container(
-        *providers, context={Config: config, RabbitBroker: broker}
-    )
+    return make_async_container(*providers, context={Config: config})
 
 
 def configure_app(app: FastAPI, root_router: APIRouter) -> None:
@@ -48,16 +44,4 @@ def configure_logging(level=DEBUG):
         datefmt=datefmt,
         format=format,
         handlers=[file_handler, stream_handler],
-    )
-
-
-def create_broker(config: RabbitMQConfig) -> RabbitBroker:
-    return RabbitBroker(
-        host=config.host,
-        port=config.port,
-        security=SASLPlaintext(
-            username=config.username,
-            password=config.password,
-        ),
-        virtualhost="/",
     )

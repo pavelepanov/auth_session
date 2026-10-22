@@ -18,7 +18,6 @@ class User:
     password_hash: PasswordHash
     is_active: bool
     role: UserRoleEnum
-    is_verified: bool
 
 
 def create_user(
@@ -26,7 +25,6 @@ def create_user(
     email: UserEmail,
     password_hash: PasswordHash,
     role: UserRoleEnum,
-    is_verified: bool,
 ) -> User:
     return User(
         id=id,
@@ -34,5 +32,4 @@ def create_user(
         password_hash=password_hash,
         is_active=True,
         role=role,
-        is_verified=is_verified,
     )

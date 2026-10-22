@@ -13,8 +13,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     command: "gunicorn -c conf/gunicorn.conf.py 'auth.run:make_app()'"
 
   postgres:
@@ -35,25 +33,6 @@ services:
       retries: 5
     ports:
       - "5432:${POSTGRES_PORT}"
-
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3-management
-    env_file:
-      - ${ENV_FILE:-.env.docker}
-    ports:
-      - "5672:${RABBITMQ_PORT}"
-      - "15672:${RABBITMQ_PORT_ADMIN}"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-    networks:
-      - custom
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
   custom:

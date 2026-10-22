@@ -6,7 +6,6 @@ from auth.application.constants import MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH
 from auth.application.errors import AlreadyExists, InvalidPassword, SignUpError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
-from auth.application.interfaces.sender_letter import SenderLetter
 from auth.application.interfaces.transaction_manager import TransactionManager
 from auth.application.interfaces.user_data_gateway import UserDataGateway
 from auth.application.interfaces.user_id_generator import UserIdGenerator
@@ -41,14 +40,12 @@ class SignUpInteractor:
         transaction_manager: TransactionManager,
         password_hasher: PasswordHasher,
         user_id_generator: UserIdGenerator,
-        sender_letter: SenderLetter,
     ):
         self._identity_provider = identity_provider
         self._user_data_gateway = user_data_gateway
         self._transaction_manager = transaction_manager
         self._password_hasher = password_hasher
         self._user_id_generator = user_id_generator
-        self._sender_letter = sender_letter
 
     async def __call__(self, request_data: SignUpRequest) -> SignUpResponse:
         current_user = await self._identity_provider.get_current_user()
@@ -61,7 +58,6 @@ class SignUpInteractor:
             normalize("NFC", request_data.raw_password)
         )
         role: UserRoleEnum = UserRoleEnum.USER
-        is_verified: bool = False
 
         user: User | None = await self._user_data_gateway.read_by_email(email=email)
 
@@ -85,13 +81,9 @@ class SignUpInteractor:
             email=email,
             password_hash=password_hash,
             role=role,
-            is_verified=is_verified,
         )
 
         await self._user_data_gateway.add(user)
-
-        await self._sender_letter.send_letter(user_id=user.id)
-
         await self._transaction_manager.commit()
 
         return SignUpResponse(id=user.id)

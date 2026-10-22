@@ -23,7 +23,6 @@ def upgrade() -> None:
             sa.Enum("admin", "user", native_enum=False, create_constraint=False),
             nullable=False,
         ),
-        sa.Column("is_verified", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
     )
     op.create_index(
