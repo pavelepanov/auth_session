@@ -8,7 +8,12 @@ sessions_table = Table(
     mapping_registry.metadata,
     Column("id", UUID(as_uuid=True), primary_key=True),
     Column("token_hash", String, nullable=False, unique=True),
-    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id"), nullable=False),
+    Column(
+        "user_id",
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    ),
     Column("expires_at", DateTime(timezone=True), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False),
 )

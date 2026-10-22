@@ -5,9 +5,9 @@ class Error(Exception):
         super().__init__()
 
         if message is None:
-            assert hasattr(
-                self, "message"
-            ), "Message must be specified in the constructor or class var."
+            assert hasattr(self, "message"), (
+                "Message must be specified in the constructor or class var."
+            )
 
         else:
             self.message = message
@@ -17,6 +17,3 @@ class Error(Exception):
 
 
 class DomainError(Error): ...
-
-
-class AccessControlError(DomainError): ...

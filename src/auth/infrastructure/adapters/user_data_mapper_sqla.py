@@ -5,7 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth.application.errors import AlreadyExists
 from auth.application.interfaces.user_data_gateway import UserDataGateway
-from auth.domain.entities.user import User, UserEmail, UserId
+from auth.domain.entities.user import (
+    Role,
+    User,
+    UserEmail,
+    UserId,
+    UserRoleEnum,
+)
 
 
 class UserDataMapperSqla(UserDataGateway):
@@ -41,3 +47,7 @@ class UserDataMapperSqla(UserDataGateway):
         user = (await self._session.execute(stmt)).scalar_one_or_none()
 
         return user
+
+    async def get_role_by_value(self, value: UserRoleEnum) -> Role:
+        stmt = select(Role).where(Role.value == value)
+        return (await self._session.execute(stmt)).scalar_one()

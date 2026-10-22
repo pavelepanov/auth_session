@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from auth.application.errors import AuthenticationError
+from auth.application.authorization import has_permission
+from auth.application.errors import AuthenticationError, PermissionDenied
 from auth.application.interfaces.identity_provider import IdentityProvider
-from auth.domain.errors import AccessControlError
-from auth.domain.user_role import UserRoleEnum, has_required_role
+from auth.domain.entities.user import PermissionEnum
 
 
 @dataclass
@@ -23,7 +23,10 @@ class UserHelloWorldInteractor:
         if user is None:
             raise AuthenticationError("You are not authenticated.")
 
-        if has_required_role(user_role=user.role, required_role=UserRoleEnum.USER):
-            return UserHelloWorldResponse(hello_world="hello world by user")
+        if not has_permission(
+            user_roles=user.roles,
+            required_permission=PermissionEnum.USER_HELLO_WORLD_VIEW,
+        ):
+            raise PermissionDenied("You do not have the required permission.")
 
-        raise AccessControlError("The required role does not exist.")
+        return UserHelloWorldResponse(hello_world="hello world by user")

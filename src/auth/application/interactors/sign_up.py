@@ -3,7 +3,11 @@ from unicodedata import normalize
 from uuid import UUID
 
 from auth.application.constants import MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH
-from auth.application.errors import AlreadyExists, InvalidPassword, SignUpError
+from auth.application.errors import (
+    AlreadyExists,
+    InvalidPassword,
+    SignUpError,
+)
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
 from auth.application.interfaces.transaction_manager import TransactionManager
@@ -16,9 +20,9 @@ from auth.domain.entities.user import (
     User,
     UserEmail,
     UserId,
+    UserRoleEnum,
     create_user,
 )
-from auth.domain.user_role import UserRoleEnum
 
 
 @dataclass
@@ -57,8 +61,6 @@ class SignUpInteractor:
         raw_password: RawPassword = RawPassword(
             normalize("NFC", request_data.raw_password)
         )
-        role: UserRoleEnum = UserRoleEnum.USER
-
         user: User | None = await self._user_data_gateway.read_by_email(email=email)
 
         if user is not None:
@@ -75,12 +77,12 @@ class SignUpInteractor:
         password_hash: PasswordHash = self._password_hasher.hash(
             raw_password=raw_password
         )
-
+        user_role = await self._user_data_gateway.get_role_by_value(UserRoleEnum.USER)
         user: User = create_user(
             id=user_id,
             email=email,
             password_hash=password_hash,
-            role=role,
+            roles=[user_role],
         )
 
         await self._user_data_gateway.add(user)
