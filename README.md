@@ -5,9 +5,9 @@
 
 # Проект
 ## Технологический стек
-- **Python**: `3.12`
-- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[async]`, `gunicorn`
-- **Development**: `isort`, `ruff`, `pre-commit`
+- **Python**: `3.14`
+- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[asyncio]`, `gunicorn`
+- **Development**: `ruff`, `mypy`, `pre-commit`
 
 
 ## Как работают веб-сессии
@@ -162,6 +162,13 @@ codegraph explore "authentication login flow"
 Нативное MCP-подключение настраивается отдельно в используемом клиенте и не
 хранится в репозитории. Правила работы AI-агентов с проектом описаны в
 `AGENTS.md`.
+
+## Проверки кода
+
+Зависимости: `uv sync --all-groups` (версия Python задана в `.python-version`).
+`make format` исправляет стиль и импорты; `make check` проверяет Ruff и mypy.
+Проверки перед коммитом без автоисправлений: `uv run pre-commit install`.
+Проверяется приложение; `conf/`, старые `tests/` и служебные файлы Alembic исключены.
 
 ## Полезные материалы
 1. Web sessions - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html

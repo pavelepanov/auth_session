@@ -60,9 +60,11 @@ class SignUpInteractor:
         raw_password: RawPassword = RawPassword(
             normalize("NFC", request_data.raw_password)
         )
-        user: User | None = await self._user_data_gateway.read_by_email(email=email)
+        existing_user: User | None = await self._user_data_gateway.read_by_email(
+            email=email
+        )
 
-        if user is not None:
+        if existing_user is not None:
             raise UserEmailAlreadyExistsError()
 
         is_valid_raw_password: bool = check_valid_raw_password(raw_password)

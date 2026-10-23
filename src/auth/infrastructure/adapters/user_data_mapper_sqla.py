@@ -29,7 +29,7 @@ class UserDataMapperSqla(UserDataGateway):
     async def read_by_email(self, email: UserEmail) -> User | None:
         normalized_email = email.strip().lower()
         stmt = select(User).where(
-            func.lower(func.btrim(User.email)) == normalized_email
+            func.lower(func.btrim(User.email)) == normalized_email  # type: ignore[misc]
         )
 
         user = (await self._session.execute(stmt)).scalar_one_or_none()
@@ -37,5 +37,5 @@ class UserDataMapperSqla(UserDataGateway):
         return user
 
     async def get_role_by_value(self, value: UserRoleEnum) -> Role:
-        stmt = select(Role).where(Role.value == value)
+        stmt = select(Role).filter_by(value=value)
         return (await self._session.execute(stmt)).scalar_one()

@@ -1,3 +1,4 @@
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from auth.application.errors import ErrorDetail
@@ -17,7 +18,7 @@ _VALIDATION_MESSAGES: dict[str, tuple[str, str]] = {
 }
 
 
-def get_validation_details(errors: list[Any]) -> list[ErrorDetail]:
+def get_validation_details(errors: Sequence[Mapping[str, Any]]) -> list[ErrorDetail]:
     """Не передаёт клиенту input, msg и ctx: они могут содержать секреты."""
     details = []
     for error in errors:

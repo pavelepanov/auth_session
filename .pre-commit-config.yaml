@@ -1,24 +1,28 @@
+exclude: ^(conf/|tests/|src/auth/infrastructure/persistence_sqla/alembic/)
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
       - id: check-yaml
       - id: check-merge-conflict
       - id: detect-private-key
       - id: debug-statements
-
-
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+  - repo: local
     hooks:
-      - id: isort
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
-    hooks:
-      - id: ruff
-        args: ["--fix", "--config", "pyproject.toml"]
+      - id: ruff-check
+        name: Ruff — проверка кода
+        entry: uv run --locked ruff check
+        language: system
+        types_or: [python, pyi]
       - id: ruff-format
-        args: ["--config", "pyproject.toml"]
+        name: Ruff — проверка форматирования
+        entry: uv run --locked ruff format --check
+        language: system
+        types_or: [python, pyi]
+      - id: mypy
+        name: mypy — проверка типов
+        entry: uv run --locked mypy
+        language: system
+        pass_filenames: false
+        files: ^(src/|pyproject\.toml$|uv\.lock$|\.python-version$)

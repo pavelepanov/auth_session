@@ -1,4 +1,5 @@
-from typing import AsyncIterable, cast
+from collections.abc import AsyncIterable
+from typing import cast
 
 from dishka import Provider, Scope, from_context, provide
 from sqlalchemy.ext.asyncio import (

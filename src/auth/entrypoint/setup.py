@@ -1,16 +1,16 @@
-from contextlib import asynccontextmanager
+from collections.abc import Iterable
 from logging import DEBUG, FileHandler, StreamHandler, basicConfig
-from typing import Iterable
 
 from dishka import AsyncContainer, Provider, make_async_container
 from fastapi import APIRouter, FastAPI
+from starlette.types import Lifespan
 
 from auth.entrypoint.config import Config
 from auth.presentation.http.base.error_handler import init_error_handlers
 from auth.presentation.http.middlewares.asgi_auth import ASGIAuthMiddleware
 
 
-def create_app(lifespan: asynccontextmanager) -> FastAPI:
+def create_app(lifespan: Lifespan[FastAPI]) -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     return app
@@ -28,7 +28,7 @@ def configure_app(app: FastAPI, root_router: APIRouter) -> None:
     init_error_handlers(app)
 
 
-def configure_logging(level=DEBUG):
+def configure_logging(level: int = DEBUG) -> None:
     format = "[%(asctime)s.%(msecs)03d] %(module)15s:%(lineno)-3d %(levelname)-7s \
      - %(message)s"
     datefmt = "%Y-%m-%d %H:%M:%S"

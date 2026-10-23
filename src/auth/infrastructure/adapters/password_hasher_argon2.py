@@ -15,7 +15,7 @@ class PasswordHasherArgon2(PasswordHasher):
     def verify(self, raw_password: RawPassword, password_hash: PasswordHash) -> bool:
         try:
             return self._hasher.verify(password_hash, raw_password)
-        except (VerificationError, InvalidHashError, UnicodeEncodeError):
+        except VerificationError, InvalidHashError, UnicodeEncodeError:
             return False
 
     def is_password_valid(self, user: User, raw_password: RawPassword) -> bool:

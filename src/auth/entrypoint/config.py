@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from os import getenv
+from os import environ, getenv
 from urllib.parse import quote
 
 
@@ -12,9 +12,9 @@ class SessionConfig:
     cookie_samesite: str = "lax"
 
     @staticmethod
-    def from_env() -> "SessionConfig":
-        expiration_minutes = getenv("SESSION_EXPIRATION_MINUTES")
-        token_hash_secret = getenv("SESSION_TOKEN_HASH_SECRET")
+    def from_env() -> SessionConfig:
+        expiration_minutes = environ["SESSION_EXPIRATION_MINUTES"]
+        token_hash_secret = environ["SESSION_TOKEN_HASH_SECRET"]
         cookie_name = getenv("SESSION_COOKIE_NAME", "__Host-session")
         cookie_secure = getenv("SESSION_COOKIE_SECURE", "true").lower() == "true"
         cookie_samesite = getenv("SESSION_COOKIE_SAMESITE", "lax")
@@ -39,12 +39,12 @@ class PostgresConfig:
     uri: str
 
     @staticmethod
-    def from_env() -> "PostgresConfig":
-        host = getenv("POSTGRES_HOST")
-        port = getenv("POSTGRES_PORT")
-        db = getenv("POSTGRES_DB")
-        user = getenv("POSTGRES_USER")
-        password = getenv("POSTGRES_PASS")
+    def from_env() -> PostgresConfig:
+        host = environ["POSTGRES_HOST"]
+        port = int(environ["POSTGRES_PORT"])
+        db = environ["POSTGRES_DB"]
+        user = environ["POSTGRES_USER"]
+        password = environ["POSTGRES_PASS"]
 
         uri = (
             f"postgresql+psycopg://"

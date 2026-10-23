@@ -1,4 +1,4 @@
-# Конфигурация 
+# Конфигурация
 ENV_FILE=.env
 ENV_DOCKER_FILE=.env.docker
 DC=docker compose
@@ -9,7 +9,7 @@ APP_FACTORY=auth.run:make_app()
 
 BACKEND_SERVICE=backend
 
-# Help 
+# Help
 .PHONY: help
 help:
 	@echo ""
@@ -30,6 +30,12 @@ help:
 	@echo ""
 	@echo "  Тесты:"
 	@echo "    make test              — Запустить тесты с покрытием (-n auto)"
+	@echo ""
+	@echo "  Качество кода:"
+	@echo "    make format            — Исправить замечания Ruff и отформатировать код"
+	@echo "    make lint              — Проверить Ruff и форматирование без изменений"
+	@echo "    make typecheck         — Проверить типы через mypy"
+	@echo "    make check             — Запустить lint и typecheck"
 	@echo ""
 	@echo "  Полный стек (Docker):"
 	@echo "    make up                — Поднять всё (инфраструктура + backend)"
@@ -86,6 +92,20 @@ docker-migrate:
 .PHONY: test
 test:
 	uv run pytest tests/ --cov=auth --cov-report=term-missing -n auto
+
+.PHONY: format lint typecheck check
+format:
+	uv run --locked ruff check --fix .
+	uv run --locked ruff format .
+
+lint:
+	uv run --locked ruff check .
+	uv run --locked ruff format --check .
+
+typecheck:
+	uv run --locked mypy
+
+check: lint typecheck
 
 # Полный стек (Docker)
 

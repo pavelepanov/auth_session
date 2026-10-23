@@ -2,7 +2,7 @@
 
 ## What this repository is
 
-This is a Python 3.12 authentication service built with FastAPI. It implements
+This is a Python 3.14 authentication service built with FastAPI. It implements
 server-side web sessions, signup/login/logout, and role-based access for `user`
 and `admin`. PostgreSQL stores users and sessions.
 
@@ -51,7 +51,7 @@ of FastAPI, Dishka, SQLAlchemy, Alembic, or another external library.
 Dependencies and the lock file are managed with `uv`:
 
 ```bash
-uv sync --python 3.12 --all-groups
+uv sync --all-groups
 cp .env.example .env                 # fill every value
 make infra-up                        # PostgreSQL
 make migrate                         # alembic upgrade head
