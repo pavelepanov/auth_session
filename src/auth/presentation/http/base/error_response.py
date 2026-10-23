@@ -40,9 +40,13 @@ def create_error_response(
 
 def get_error_responses(
     *error_types: type[ApplicationError],
-    include_validation: bool = False,
+    include_input_errors: bool = False,
 ) -> dict[int | str, dict[str, Any]]:
-    """Объединяет ошибки одного HTTP-статуса, сохраняя все примеры для Swagger."""
+    """Формирует описание ответов с ошибками для OpenAPI.
+
+    Ошибки одного HTTP-статуса объединяются с сохранением всех примеров.
+    Флаг include_input_errors добавляет описание ошибок входных данных 400/422.
+    """
     responses: dict[int | str, dict[str, Any]] = {}
 
     def add_response(
@@ -75,7 +79,7 @@ def get_error_responses(
             get_error_http_status(error_type), error_type.code, error_type.message
         )
 
-    if include_validation:
+    if include_input_errors:
         add_response(400, BAD_REQUEST_CODE, BAD_REQUEST_MESSAGE)
         add_response(
             422,

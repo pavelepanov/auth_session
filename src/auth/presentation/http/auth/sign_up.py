@@ -30,7 +30,7 @@ class SignUpRequestModel(BaseModel):
         AlreadyAuthenticatedError,
         UserEmailAlreadyExistsError,
         InvalidPasswordError,
-        include_validation=True,
+        include_input_errors=True,
     ),
 )
 @inject
@@ -38,7 +38,7 @@ async def sign_up(
     request_data: SignUpRequestModel,
     interactor: FromDishka[SignUpInteractor],
 ) -> DataResponse[SignUpResponse]:
-    result = await interactor(
+    result: SignUpResponse = await interactor(
         SignUpRequest(email=request_data.email, raw_password=request_data.raw_password)
     )
     return DataResponse(data=result)

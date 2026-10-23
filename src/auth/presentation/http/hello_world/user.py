@@ -21,4 +21,5 @@ user_hello_world_router = APIRouter()
 async def user_hello_world(
     interactor: FromDishka[UserHelloWorldInteractor],
 ) -> DataResponse[UserHelloWorldResponse]:
-    return DataResponse(data=await interactor())
+    result: UserHelloWorldResponse = await interactor()
+    return DataResponse(data=result)

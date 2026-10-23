@@ -21,4 +21,5 @@ admin_hello_world_router = APIRouter()
 async def admin_hello_world(
     interactor: FromDishka[AdminHelloWorldInteractor],
 ) -> DataResponse[AdminHelloWorldResponse]:
-    return DataResponse(data=await interactor())
+    result: AdminHelloWorldResponse = await interactor()
+    return DataResponse(data=result)

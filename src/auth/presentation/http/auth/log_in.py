@@ -21,7 +21,7 @@ class LogInRequestModel(BaseModel):
     responses=get_error_responses(
         InvalidCredentialsError,
         AlreadyAuthenticatedError,
-        include_validation=True,
+        include_input_errors=True,
     ),
 )
 @inject
