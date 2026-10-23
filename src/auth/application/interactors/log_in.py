@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from unicodedata import normalize
 
-from auth.application.errors import AuthenticationError, LogInError
+from auth.application.errors import AlreadyAuthenticatedError, InvalidCredentialsError
 from auth.application.interfaces.client_session_transport import ClientSessionTransport
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
@@ -52,7 +52,7 @@ class LogInInteractor:
     async def __call__(self, request_data: LogInRequest) -> None:
         current_user = await self._identity_provider.get_current_user()
         if current_user is not None:
-            raise LogInError("You are already authenticated.")
+            raise AlreadyAuthenticatedError()
 
         email: UserEmail = UserEmail(request_data.email.strip().lower())
         raw_password: RawPassword = RawPassword(
@@ -60,19 +60,19 @@ class LogInInteractor:
         )
 
         if not check_valid_raw_password(raw_password):
-            raise AuthenticationError("Invalid email or password.")
+            raise InvalidCredentialsError()
 
         user: User | None = await self._user_data_gateway.read_by_email(email=email)
         if user is None:
-            raise AuthenticationError("Invalid email or password.")
+            raise InvalidCredentialsError()
 
         if not user.is_active:
-            raise AuthenticationError("Invalid email or password.")
+            raise InvalidCredentialsError()
 
         if not self._password_hasher.is_password_valid(
             user=user, raw_password=raw_password
         ):
-            raise AuthenticationError("Invalid email or password.")
+            raise InvalidCredentialsError()
 
         session_token = self._session_token_generator.generate()
         expires_at = datetime.now(UTC) + timedelta(

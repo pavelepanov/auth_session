@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from auth.application.authorization import has_permission
-from auth.application.errors import AuthenticationError, PermissionDenied
+from auth.application.errors import PermissionDeniedError, UnauthenticatedError
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.domain.entities.user import PermissionEnum
 
@@ -21,12 +21,12 @@ class UserHelloWorldInteractor:
     async def __call__(self) -> UserHelloWorldResponse:
         user = await self._identity_provider.get_current_user()
         if user is None:
-            raise AuthenticationError("You are not authenticated.")
+            raise UnauthenticatedError()
 
         if not has_permission(
             user_roles=user.roles,
             required_permission=PermissionEnum.USER_HELLO_WORLD_VIEW,
         ):
-            raise PermissionDenied("You do not have the required permission.")
+            raise PermissionDeniedError()
 
         return UserHelloWorldResponse(hello_world="hello world by user")

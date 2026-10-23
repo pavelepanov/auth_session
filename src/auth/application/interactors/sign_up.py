@@ -2,11 +2,10 @@ from dataclasses import dataclass
 from unicodedata import normalize
 from uuid import UUID
 
-from auth.application.constants import MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH
 from auth.application.errors import (
-    AlreadyExists,
-    InvalidPassword,
-    SignUpError,
+    AlreadyAuthenticatedError,
+    InvalidPasswordError,
+    UserEmailAlreadyExistsError,
 )
 from auth.application.interfaces.identity_provider import IdentityProvider
 from auth.application.interfaces.password_hasher import PasswordHasher
@@ -54,7 +53,7 @@ class SignUpInteractor:
     async def __call__(self, request_data: SignUpRequest) -> SignUpResponse:
         current_user = await self._identity_provider.get_current_user()
         if current_user is not None:
-            raise SignUpError("You are already authenticated.")
+            raise AlreadyAuthenticatedError()
 
         user_id: UserId = self._user_id_generator()
         email: UserEmail = UserEmail(request_data.email.strip().lower())
@@ -64,15 +63,11 @@ class SignUpInteractor:
         user: User | None = await self._user_data_gateway.read_by_email(email=email)
 
         if user is not None:
-            raise AlreadyExists("User with this email already exists.")
+            raise UserEmailAlreadyExistsError()
 
         is_valid_raw_password: bool = check_valid_raw_password(raw_password)
-
         if not is_valid_raw_password:
-            raise InvalidPassword(
-                f"Password must contain between {MIN_PASSWORD_LENGTH} and "
-                f"{MAX_PASSWORD_LENGTH} characters and be valid Unicode."
-            )
+            raise InvalidPasswordError()
 
         password_hash: PasswordHash = self._password_hasher.hash(
             raw_password=raw_password

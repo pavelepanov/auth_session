@@ -1,28 +1,59 @@
-from auth.domain.errors import Error
+from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import ClassVar
 
 
-class ApplicationError(Error): ...
+@dataclass(frozen=True)
+class ErrorDetail:
+    """Детали передаются клиенту; пароли и токены сюда не включать."""
+
+    field: str
+    code: str
+    message: str
 
 
-class AuthenticationError(ApplicationError): ...
+class ApplicationError(Exception):
+    code: ClassVar[str] = "APPLICATION_ERROR"
+    message: str = "Ошибка приложения."
+    details: tuple[ErrorDetail, ...] = ()
+
+    def __init__(
+        self,
+        message: str | None = None,
+        *,
+        details: Iterable[ErrorDetail] | None = None,
+    ) -> None:
+        if message is not None:
+            self.message = message
+        self.details = tuple(details) if details is not None else self.details
+        super().__init__(self.message)
 
 
-class PermissionDenied(ApplicationError): ...
+class UnauthenticatedError(ApplicationError):
+    code = "UNAUTHENTICATED"
+    message = "Пользователь не аутентифицирован."
 
 
-class DoesNotExists(ApplicationError): ...
+class InvalidCredentialsError(ApplicationError):
+    code = "INVALID_CREDENTIALS"
+    message = "Неверный email или пароль."
 
 
-class AlreadyExists(ApplicationError): ...
+class AlreadyAuthenticatedError(ApplicationError):
+    code = "ALREADY_AUTHENTICATED"
+    message = "Вы уже авторизованы."
 
 
-class InvalidPassword(ApplicationError): ...
+class PermissionDeniedError(ApplicationError):
+    code = "PERMISSION_DENIED"
+    message = "Недостаточно прав."
 
 
-class SignUpError(ApplicationError): ...
+class UserEmailAlreadyExistsError(ApplicationError):
+    code = "USER_EMAIL_ALREADY_EXISTS"
+    message = "Пользователь с таким email уже существует."
 
 
-class LogInError(ApplicationError): ...
-
-
-class LogOutError(ApplicationError): ...
+class InvalidPasswordError(ApplicationError):
+    code = "INVALID_PASSWORD"
+    message = "Пароль не соответствует требованиям."
