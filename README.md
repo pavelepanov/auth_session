@@ -6,7 +6,7 @@
 # Проект
 ## Технологический стек
 - **Python**: `3.14`
-- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[asyncio]`, `gunicorn`
+- **Production**: `alembic`, `dishka`, `fastapi`, `psycopg`, `sqlalchemy[asyncio]`, `granian`
 - **Development**: `ruff`, `mypy`, `pre-commit`
 
 
@@ -77,16 +77,19 @@ permissions через роли пользователя. Если до исте
 - 'admin' (GET): Требует `admin_hello_world.view`
   - return: Hello world by admin
 
-Seed-миграция `0002_seed_admin` создаёт роли, начальную матрицу доступа и администратора:
+Seed-миграция `0002_seed_roles` создаёт роли и разрешения.
+Тестовых пользователей можно создать отдельно: `just seed-users` локально или
+`just seed-users docker` в запущенном Docker-стеке. Существующие записи пропускаются.
 
-- Логин (email): `admin@mail.com`
-- Пароль: `admin12345admin`
+| Роль | Email | Пароль |
+| --- | --- | --- |
+| admin | `admin@example.com` | `admin-test-password` |
+| user | `user@example.com` | `user-test-password` |
 
 ## Файловая структура
 
 ```
 .
-├── conf # конфиги
 ├── docs # документация
 └── src
     └── auth
@@ -123,16 +126,18 @@ Seed-миграция `0002_seed_admin` создаёт роли, начальн�
 
 Скопируйте нужный шаблон в соответствующий файл (`.env` или `.env.docker`) и заполните актуальные значения перед запуском.
 
-При локальном запуске `make app` и команды миграций загружают `.env` через uv.
+При локальном запуске `just dev` загружает `.env` через uv.
 В Docker переменные окружения передаются через Compose.
 
 ## Как запустить
-1. Склонируй проект
-2. Заполни переменные окружения
-3. Подними проект ``docker compose up --build``
-4. Примени миграции напрямую в контейнере либо командой ``make migrate``. При
-   первом применении seed-миграции будут созданы роли, permissions и
-   первоначальный администратор.
+1. Склонируй проект и установи uv, just и Docker Compose.
+2. Заполни `.env` для локального запуска или `.env.docker` для полного стека.
+3. Локально: `just dev` — PostgreSQL, миграции, тестовые пользователи и приложение.
+4. В Docker: `just migrate docker`, затем `just up`.
+5. Остановка: `just down local` или `just down`. Список команд: `just`.
+
+В Docker миграции запускаются вручную. В локальном `just dev` миграции и создание
+тестовых пользователей выполняются автоматически; существующие записи пропускаются.
 
 ## CodeGraph для работы с AI-агентами
 
@@ -166,9 +171,9 @@ codegraph explore "authentication login flow"
 ## Проверки кода
 
 Зависимости: `uv sync --all-groups` (версия Python задана в `.python-version`).
-`make format` исправляет стиль и импорты; `make check` проверяет Ruff и mypy.
+`just check` проверяет Ruff, форматирование и mypy.
 Проверки перед коммитом без автоисправлений: `uv run pre-commit install`.
-Проверяется приложение; `conf/`, старые `tests/` и служебные файлы Alembic исключены.
+Проверяется приложение; старые `tests/` и служебные файлы Alembic исключены.
 
 ## Полезные материалы
 1. Web sessions - https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html

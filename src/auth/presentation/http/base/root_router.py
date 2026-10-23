@@ -7,6 +7,11 @@ from auth.presentation.http.hello_world.hello_world_router import hello_world_ro
 root_router = APIRouter()
 
 
+@root_router.get("/health", include_in_schema=False)
+async def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @root_router.get("/", tags=["General"])
 async def redirect_to_docs() -> RedirectResponse:
     return RedirectResponse(url="docs/")

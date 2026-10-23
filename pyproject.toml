@@ -12,15 +12,16 @@ dependencies = [
     "alembic>=1.14.1",
     "argon2-cffi>=25.1.0",
     "dishka>=1.4.2",
-    "fastapi[standard]>=0.115.7",
-    "gunicorn>=23.0.0",
+    "email-validator>=2.3.0",
+    "fastapi>=0.115.7",
+    "granian>=2.0.0,<3",
     "psycopg[binary]>=3.2.4",
-    "redis>=5.2.1",
     "sqlalchemy[asyncio]>=2.0.37",
 ]
 
 [dependency-groups]
 dev = [
+    "granian[reload]>=2.0.0,<3",
     "mypy>=2.4.0",
     "pre-commit>=4.1.0",
     "ruff>=0.17.2",
@@ -46,7 +47,6 @@ target-version = "py314"
 src = ["src"]
 force-exclude = true
 extend-exclude = [
-    "conf",
     "tests",
     "src/auth/infrastructure/persistence_sqla/alembic",
 ]

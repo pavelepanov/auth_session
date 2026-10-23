@@ -1,0 +1,52 @@
+name: auth-session
+
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS:?}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    restart: unless-stopped
+    stop_grace_period: 60s
+
+  backend:
+    image: ${BACKEND_IMAGE:-auth-session:local}
+    build:
+      context: .
+    init: true
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASS: ${POSTGRES_PASS:?}
+      SESSION_EXPIRATION_MINUTES: ${SESSION_EXPIRATION_MINUTES:-10080}
+      SESSION_TOKEN_HASH_SECRET: ${SESSION_TOKEN_HASH_SECRET:?}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-session}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      SESSION_COOKIE_SAMESITE: ${SESSION_COOKIE_SAMESITE:-lax}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=2).close()"]
+      interval: 10s
+      timeout: 3s
+      start_period: 20s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    stop_grace_period: 45s
+
+volumes:
+  postgres_data:

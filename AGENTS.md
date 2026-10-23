@@ -53,25 +53,47 @@ Dependencies and the lock file are managed with `uv`:
 ```bash
 uv sync --all-groups
 cp .env.example .env                 # fill every value
-make infra-up                        # PostgreSQL
-make migrate                         # alembic upgrade head
-make app                             # reload-enabled Gunicorn on localhost
+just dev                            # PostgreSQL, migrations, demo users, Granian
 ```
 
 For the complete containerized stack, copy `.env.docker.example` to
-`.env.docker`, fill it, then run `make up`. Useful commands are documented by
-`make help`.
+`.env.docker`, fill it, then run `just migrate docker` and `just up`.
+Run `just` to list recipes. `compose.local.yaml` runs only PostgreSQL;
+`compose.yaml` runs PostgreSQL and the backend. These use separate project names
+and named volumes. Never run `down -v` against a database that must be kept.
 
-Local application and migration targets load `.env` with `uv run --env-file`;
+Local application and migration recipes load `.env` with `uv run --env-file`;
 override the path with `ENV_FILE`. Application configuration reads only the
 process environment and must not import or call python-dotenv.
 Keep configuration in `entrypoint/config.py` as plain dataclasses with
 `from_env()` methods. Configuration types should depend only on the standard
 library.
 
-Required settings are PostgreSQL host/port/database/user/password,
-`BACKEND_PORT`, `SESSION_EXPIRATION_MINUTES`, and `SESSION_TOKEN_HASH_SECRET`.
-Never commit `.env` or `.env.docker`.
+Required application settings are PostgreSQL host/port/database/user/password,
+`SESSION_EXPIRATION_MINUTES`, and `SESSION_TOKEN_HASH_SECRET`. `BACKEND_PORT`
+controls the local listener or the published Docker host port; the container
+always listens on 8000. The seed migration creates only roles, permissions, and
+their links; it must not create users or require bootstrap credentials.
+`just seed-users` / `just seed-users docker` explicitly create two demo accounts
+using `infrastructure/persistence_sqla/seed_users.py`. Local `just dev` also
+invokes it after migrations. Never invoke this script automatically during
+production startup or migrations. Existing accounts are left
+unchanged. Never commit `.env` or `.env.docker`.
+
+The Dockerfile starts Granian in ASGI factory mode with four workers. Keep
+production dependencies separate from development extras. Use stderr/stdout for
+logging: the backend container runs as a non-root user. Granian access logging
+is explicitly disabled. Leave Docker log storage and shipping to the host/agent
+configuration; do not add application log files. Define the backend healthcheck
+in Compose. `/health` is a liveness probe without database access. Compose waits
+for PostgreSQL health before starting the backend. Local `just dev` applies
+migrations and seeds demo users before Granian starts. Otherwise migrations run
+only with `just migrate` or `just migrate docker`; never apply them implicitly
+in Docker `up` or `seed-users`. The Docker migration recipe starts a
+one-off backend container with `alembic upgrade head` instead of Granian and
+removes it after completion.
+PostgreSQL is not published in production; backend is bound to host loopback
+for an external HTTPS reverse proxy. Preserve secure cookie defaults.
 
 ## Rules for changes
 
@@ -94,8 +116,9 @@ Never commit `.env` or `.env.docker`.
   Schema changes must keep the domain
   entity, `infrastructure/persistence_sqla/mappings/`, and an Alembic migration
   consistent. Create migrations with
-  `make migrate-create NAME='0002_short_description'`, choosing the next numeric
-  filename prefix, and review generated SQL. Keep Alembic revision identifiers
+  `uv run --locked --env-file .env alembic revision --autogenerate
+  -m '0003_short_description'` (one command), choosing the next numeric filename
+  prefix, and review generated SQL. Keep Alembic revision identifiers
   and `down_revision` links independent of the numbered filenames.
   Store Python enum values as strings with `native_enum=False`, without native
   PostgreSQL enum types. Session timestamps use `DateTime(timezone=True)` and
@@ -124,7 +147,7 @@ finishing:
 
 ```bash
 uv run pytest tests/unit/application/interactors/test_log_in.py
-make test
+uv run --all-groups pytest tests/
 uv run ruff check .
 uv run ruff format --check .
 ```

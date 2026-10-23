@@ -1,4 +1,4 @@
-exclude: ^(conf/|tests/|src/auth/infrastructure/persistence_sqla/alembic/)
+exclude: ^(tests/|src/auth/infrastructure/persistence_sqla/alembic/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

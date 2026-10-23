@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from logging import DEBUG, FileHandler, StreamHandler, basicConfig
+from logging import INFO, StreamHandler, basicConfig
 
 from dishka import AsyncContainer, Provider, make_async_container
 from fastapi import APIRouter, FastAPI
@@ -28,13 +28,10 @@ def configure_app(app: FastAPI, root_router: APIRouter) -> None:
     init_error_handlers(app)
 
 
-def configure_logging(level: int = DEBUG) -> None:
+def configure_logging(level: int = INFO) -> None:
     format = "[%(asctime)s.%(msecs)03d] %(module)15s:%(lineno)-3d %(levelname)-7s \
      - %(message)s"
     datefmt = "%Y-%m-%d %H:%M:%S"
-
-    file_handler = FileHandler("logs.log")
-    file_handler.setLevel(level)
 
     stream_handler = StreamHandler()
     stream_handler.setLevel(level)
@@ -43,5 +40,5 @@ def configure_logging(level: int = DEBUG) -> None:
         level=level,
         datefmt=datefmt,
         format=format,
-        handlers=[file_handler, stream_handler],
+        handlers=[stream_handler],
     )
