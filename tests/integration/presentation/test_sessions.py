@@ -98,12 +98,14 @@ class TestSessionLifecycle:
         assert (await full_client.get("/hello_world/admin")).status_code == 200
 
     @pytest.mark.parametrize("kind", ["unknown", "expired", "inactive"])
+    @pytest.mark.parametrize("path", ["/hello_world/user", "/me"])
     async def test_invalid_session_revokes_access_and_cookie(
         self,
         logged_in_client: AsyncClient,
         db_session: AsyncSession,
         stored_user: User,
         kind: str,
+        path: str,
     ) -> None:
         if kind == "unknown":
             logged_in_client.cookies.clear()
@@ -118,15 +120,16 @@ class TestSessionLifecycle:
                 stored_user.is_active = False
             await db_session.commit()
 
-        response = await logged_in_client.get("/hello_world/user")
+        response = await logged_in_client.get(path)
 
         assert response.status_code == 401
         assert "max-age=0" in response.headers["set-cookie"].lower()
         if kind != "unknown":
             assert (await db_session.scalars(select(Session))).all() == []
 
+    @pytest.mark.parametrize("path", ["/hello_world/user", "/me"])
     async def test_renewal_extends_same_session_and_refreshes_cookie(
-        self, logged_in_client: AsyncClient, db_session: AsyncSession
+        self, logged_in_client: AsyncClient, db_session: AsyncSession, path: str
     ) -> None:
         token = logged_in_client.cookies["__Host-session"]
         session = (await db_session.scalars(select(Session))).one()
@@ -135,7 +138,7 @@ class TestSessionLifecycle:
         session_id = session.id
         await db_session.commit()
 
-        response = await logged_in_client.get("/hello_world/user")
+        response = await logged_in_client.get(path)
         await db_session.refresh(session)
 
         assert response.status_code == 200

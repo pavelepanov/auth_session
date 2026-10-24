@@ -2,6 +2,12 @@ from httpx import AsyncClient
 
 
 class TestGeneralEndpoints:
+    async def test_swagger_remains_available(self, client: AsyncClient) -> None:
+        response = await client.get("/docs")
+
+        assert response.status_code == 200
+        assert "Swagger UI" in response.text
+
     async def test_health_does_not_require_database(self, client: AsyncClient) -> None:
         response = await client.get("/health")
 
@@ -9,11 +15,12 @@ class TestGeneralEndpoints:
         assert response.json() == {"status": "ok"}
         assert "set-cookie" not in response.headers
 
-    async def test_root_redirects_to_docs(self, client: AsyncClient) -> None:
+    async def test_root_is_not_registered(self, client: AsyncClient) -> None:
         response = await client.get("/")
 
-        assert response.status_code == 307
-        assert response.headers["location"] == "docs/"
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "NOT_FOUND"
+        assert "location" not in response.headers
 
     async def test_unknown_route_has_structured_error(
         self, client: AsyncClient
@@ -34,6 +41,8 @@ class TestGeneralEndpoints:
 
         assert response.status_code == 200
         paths = response.json()["paths"]
+        assert "/" not in paths
+        assert set(paths["/me"]["get"]["responses"]) >= {"200", "401", "500"}
         assert set(paths["/auth/login"]["post"]["responses"]) >= {
             "200",
             "401",
