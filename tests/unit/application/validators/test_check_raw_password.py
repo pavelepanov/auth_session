@@ -5,49 +5,20 @@ from auth.domain.entities.user import RawPassword
 
 
 class TestCheckValidRawPassword:
-
     @pytest.mark.parametrize(
-        "password",
+        ("password", "expected"),
         [
-            "Password1",
-            "Abcdefg1",
-            "StrongPass123",
-            "MyP4ssword",
-            "ABCD1234abcd",
-        ],
-        ids=[
-            "basic_valid",
-            "exactly_8_chars",
-            "long_with_numbers",
-            "digit_in_middle",
-            "mixed_case_and_digits",
+            pytest.param("", False, id="empty"),
+            pytest.param("a" * 14, False, id="below_minimum"),
+            pytest.param("a" * 15, True, id="minimum"),
+            pytest.param("a" * 128, True, id="maximum"),
+            pytest.param("a" * 129, False, id="above_maximum"),
+            pytest.param("пароль" * 3, True, id="unicode"),
+            pytest.param("😀" * 15, True, id="multibyte_characters"),
+            pytest.param("a" * 15 + "\ud800", False, id="invalid_unicode"),
         ],
     )
-    def test_valid_passwords(self, password: str):
+    def test_password_requirements(self, password: str, expected: bool) -> None:
         result = check_valid_raw_password(RawPassword(password))
-        assert result is True
 
-    @pytest.mark.parametrize(
-        "password",
-        [
-            "short1A",
-            "alllowercase1",
-            "ALLUPPERCASE1",
-            "NoDigitsHere",
-            "12345678",
-            "",
-            "Ab1",
-        ],
-        ids=[
-            "too_short",
-            "no_uppercase",
-            "no_lowercase",
-            "no_digits",
-            "only_digits",
-            "empty_string",
-            "only_3_chars",
-        ],
-    )
-    def test_invalid_passwords(self, password: str):
-        result = check_valid_raw_password(RawPassword(password))
-        assert result is False
+        assert result is expected

@@ -80,4 +80,12 @@ compose mode +args:
 check:
     uv run --locked ruff check .
     uv run --locked ruff format --check .
-    uv run --locked mypy
+    uv run --locked --all-groups mypy
+
+# Все тесты параллельно с coverage; можно передать файл тестов и параметры pytest.
+test *args:
+    uv run --locked --group test python -m pytest -n auto --cov=auth --cov-branch --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=90 "$@"
+
+# Все тесты параллельно без coverage; можно передать файл тестов и параметры pytest.
+test-no-cov *args:
+    uv run --locked --group test python -m pytest -p no:pytest_cov -n auto "$@"

@@ -27,6 +27,8 @@ dev = [
     "ruff>=0.17.2",
 ]
 test = [
+    "filelock>=3.18",
+    "httpx>=0.28.1",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.25.0",
     "pytest-cov>=6.0.0",
@@ -35,11 +37,25 @@ test = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
+
+[tool.coverage.run]
+branch = true
+source = ["auth"]
+omit = [
+    "*/persistence_sqla/alembic/*",
+    "*/persistence_sqla/seed_users.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+precision = 2
 
 [tool.ruff]
 line-length = 88
@@ -47,7 +63,6 @@ target-version = "py314"
 src = ["src"]
 force-exclude = true
 extend-exclude = [
-    "tests",
     "src/auth/infrastructure/persistence_sqla/alembic",
 ]
 
@@ -66,7 +81,7 @@ docstring-code-format = true
 [tool.mypy]
 python_version = "3.14"
 mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
-files = ["src/auth"]
+files = ["src/auth", "tests"]
 exclude = ['^src/auth/infrastructure/persistence_sqla/alembic/']
 strict = true
 warn_unused_configs = true

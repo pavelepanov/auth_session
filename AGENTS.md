@@ -147,15 +147,42 @@ finishing:
 
 ```bash
 uv run pytest tests/unit/application/interactors/test_log_in.py
-uv run --all-groups pytest tests/
+just test
 uv run ruff check .
 uv run ruff format --check .
+uv run --locked --all-groups mypy
 ```
 
-Tests mirror the source tree. Unit tests should mock application interfaces and
+Place tests beside the corresponding layer when there is behavior worth testing.
+Do not create tests merely to mirror a directory or verify dataclass assignments,
+standard-library wrappers, or business cases already covered at the same boundary.
+Unit tests should mock application interfaces and
 cover success plus business-error paths. Add integration coverage when behavior
 depends on real SQLAlchemy mappings, migrations, cookies, middleware, or broker
 wiring.
+
+The test layout and fixture style follow josko_backend: classes for interactors,
+unit adapters and HTTP tests; module-level functions for infrastructure integrations. Prefer AAA tests
+that assert business results and observable state over mock call counts.
+`just test [pytest options]` runs tests in parallel with branch coverage and
+reports. `just test-no-cov [test paths / node IDs / pytest options]` runs the same
+suite in parallel with the coverage plugin disabled. Both commands forward
+arguments directly to pytest. The complete suite must meet 90% coverage;
+only Alembic files and the local demo-account script `seed_users.py` are omitted.
+Dedicated seed-user tests are outside the agreed suite. Static checks
+include `tests/`; pre-commit must not run tests.
+
+Database fixtures in `tests/integration/conftest.py` lazily start only the separate
+`compose.test.yaml` PostgreSQL. A session-scoped FileLock coordinates startup
+once across workers. Do not infer the need for a database from test filenames.
+HTTP clients and providers belong in `tests/integration/presentation/conftest.py`.
+Do not add dedicated entrypoint tests. All interactors have unit and real HTTP
+coverage; add direct interactor integration tests only for distinct behavior
+that is not already checked at the HTTP boundary.
+Each xdist worker owns a temporary migrated database; every database test uses
+an outer transaction with `join_transaction_mode="create_savepoint"` and rolls
+back its changes, including application commits. Use only `TEST_POSTGRES_*`
+settings for external test services; never reuse the application's database.
 
 Before handing off a change, confirm that migrations are intentional, no secret
 or local environment file is tracked, the CodeGraph index is current, and the

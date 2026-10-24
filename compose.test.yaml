@@ -1,0 +1,18 @@
+name: auth-session-tests
+
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: auth_test
+      POSTGRES_PASSWORD: auth_test
+    ports:
+      - "127.0.0.1:${TEST_POSTGRES_PORT:-55432}:5432"
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_test -d postgres"]
+      interval: 1s
+      timeout: 3s
+      retries: 30

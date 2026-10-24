@@ -1,4 +1,4 @@
-exclude: ^(tests/|src/auth/infrastructure/persistence_sqla/alembic/)
+exclude: ^src/auth/infrastructure/persistence_sqla/alembic/
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -22,7 +22,7 @@ repos:
         types_or: [python, pyi]
       - id: mypy
         name: mypy — проверка типов
-        entry: uv run --locked mypy
+        entry: uv run --locked --all-groups mypy
         language: system
         pass_filenames: false
-        files: ^(src/|pyproject\.toml$|uv\.lock$|\.python-version$)
+        files: ^(src/|tests/|pyproject\.toml$|uv\.lock$|\.python-version$)
